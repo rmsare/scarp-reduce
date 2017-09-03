@@ -1,8 +1,12 @@
 """
 Worker classes for template matching
 """
+import dem, scarplet
 
-from itertools import izip
+import uuid
+
+
+
 
 NUM_ANGLES = 181
 NUM_AGES = 32
@@ -22,7 +26,6 @@ class Matcher(Worker):
     
     def __init__(self, source):
         self.age = None
-        self.angle = None
         self.path = '/efs/results/'
         self.filename = None 
         self.source = None
@@ -35,14 +38,14 @@ class Matcher(Worker):
         self.results = self.results[:, j:-j, i:-i]
 
     def save_template_match(self):
-        self.results = match_template(self.data, self.age, self.angle)
+        self.results = match_template(self.data, self.age)
         self.clip_results(PAD_DX, PAD_DY)
         np.save(self.path + self.filename, self.results)
 
     def set_params(self, age, angle):
         self.age = age
         self.angle = angle
-        self.filename = 'L0_' + str(self.age) + '_' + str(self.angle) + '.npy'
+        self.filename = 'results_' + str(self.age) + '.npy'
 
     def set_source(self, source):
         self.source = source
@@ -66,7 +69,7 @@ class Reducer(Worker):
         os.remove(self.path + file1)
         os.remove(self.path + file2)
         
-        filename = '{d}.npy'.format()
+        filename = uuid.uuid4().hex + '.npy'
         np.save(self.path + filename, data2)
         
     def reduce(self):
