@@ -11,32 +11,6 @@ MAX_AGE = 3.5
 PAD_DX = 200
 PAD_DY = 200
 
-class CacheProcessor(object):
-
-    def __init__(self, d, de, source, data_path, template_path):
-        self.d = d
-        self.de = de
-        self.data_path = data_path
-        self.template_path = template_path
-        self.data = dem.DEMGrid(source)
-        self.data._pad_boundary(PAD_DX, PAD_DY)
-        self.nrows, self.ncols = self.data._griddata.shape
-        self.Template = Scarp
-
-    def cache_curvature(self):
-        for angle in np.linspace(-np.pi/2, np.pi/2, NUM_ANGLES):
-            c = self.obj._calculate_directional_laplacian_numexpr(angle)
-            np.save(self.data_path + 'curv_' + str(angle) + '.npy', c)
-
-    def cache_templates(self):
-
-        for logage in np.linspace(0, MAX_AGE, NUM_AGES):
-            for angle in np.linspace(-np.pi/2, np.pi/2, NUM_ANGLES):
-                age = 10.**logage
-                template = self.Template(self.d, age, angle, self.ncols, self.nrows, self.de).template()
-                fname = self.template_path + 't_' + str(self.d) + 'm_kt' + str(logage) + '_ang' + str(angle) + '.npy'
-                np.save(fname, template)
-
 
 class Worker(object):
 
@@ -77,10 +51,11 @@ class Matcher(Worker):
         self.dy = data._georef_info.dy
 
       
-class TreeReducer(Worker):
+class Reducer(Worker):
 
     def __init__(self, path):
         self.path = path
+        self.best_results = None
         
     def compare(self, file1, file2, level):
         data1 = np.load(self.path + file1)
@@ -91,24 +66,16 @@ class TreeReducer(Worker):
         os.remove(self.path + file1)
         os.remove(self.path + file2)
         
-        filename = 'L{:d}_{:d}.npy'.format(level, os.getpid())
-        np.save(self.path + , data2)
+        filename = '{d}.npy'.format()
+        np.save(self.path + filename, data2)
         
-    def tree_reduce(self):
+    def reduce(self):
         results = os.listdir(self.path)
-        level = 1
         
         while len(results) > 1:
-            for results1, results2 in pairwise(results):
-                level1 = results1[1]
-                level2 = results2[1]
-                if level1 == level2:
-                    self.compare(results1, results2, level)
-                    results = os.listdir(self.path)
-            level += 1
+            results1 = results.pop()
+            results2 = results.pop()
+            self.compare(results1, results2)
+            results = os.listdir(self.path)
         self.best_results = os.listdir(self.path)[0]
                 
-
-def pairwise(iterable):
-    x = iter(iterable)
-    return izip(x, x)
