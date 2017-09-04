@@ -1,4 +1,7 @@
-from Worker import CacheProcessor, Matcher, TreeReducer
+import os, sys
+sys.path.append('/home/ubuntu/scarplet-python/scarplet')
+import dem, scarplet
+from Worker import Matcher, Reducer
 
 # Divide grid into standard size chunks... 100 
 
@@ -8,9 +11,6 @@ from Worker import CacheProcessor, Matcher, TreeReducer
 
 # Pad data
 source = '/efs/data/carrizo.tif'
-data = dem.DEMGrid(source)
-data._pad_bpoundary(PAD_DX, PAD_DY)
-print('Data size: {}'.format(data._griddata.shape))
 
 # Divide up parameter space into k subsets
 # Launch k Matcher instances
@@ -19,11 +19,19 @@ worker = Matcher(source)
 
 # Match templates
 ages = [0, 1]
+start = timer()
 worker.process_data(ages)
+stop = timer()
+print('Fits:\t\t {} s per template'.format((stop-start)/len(ages)))
 
 # Launch Reducer instance
+reducer = Reducer('/efs/results')
 
 # Reduce results as they arrive
+start = timer()
+reducer.reduce()
+stop = timer()
+print('Reduce:\t\t {} s'.format(stop-start))
 
 # Convert best results to TIFF
 
