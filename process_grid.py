@@ -1,6 +1,7 @@
 import os, sys
 sys.path.append('/home/ubuntu/scarplet-python/scarplet')
 import dem, scarplet
+from timeit import default_timer as timer
 from Worker import Matcher, Reducer
 
 # Divide grid into standard size chunks... 100 
@@ -18,9 +19,9 @@ source = '/efs/data/carrizo.tif'
 worker = Matcher(source)    
 
 # Match templates
-ages = [0, 1]
+ages = [0]
 start = timer()
-worker.process_data(ages)
+worker.process(ages)
 stop = timer()
 print('Fits:\t\t {} s per template'.format((stop-start)/len(ages)))
 

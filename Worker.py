@@ -42,7 +42,7 @@ class Matcher(object):
         self.data = dem.DEMGrid(self.source)
         self.data._pad_boundary(PAD_DX, PAD_DY)
     
-    def match_template(data, d, age):
+    def match_template(self, data, d, age):
         return scarplet.calculate_best_fit_parameters(data, Scarp, d, age)
 
     def process(self, ages):
