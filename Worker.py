@@ -31,8 +31,8 @@ class Matcher(object):
         self.age = None
         self. d = None
         self.path = '/efs/results/'
-        self.set_source(source)
-    
+        self.source = source    
+
     def clip_results(pad_dx, pad_dy):
         i = pad_dx / self.dx
         j = pad_dy / self.dy
@@ -40,14 +40,16 @@ class Matcher(object):
 
     def load_data(self):
         self.data = dem.DEMGrid(self.source)
-        self.data._pad_boundary(PAD_DX, PAD_DY)
+        self.dx = self.data._georef_info.dx
+        self.dy = self.data._georef_info.dy
+        #self.data._pad_boundary(PAD_DX, PAD_DY) # Pad data once
     
     def match_template(self, data, d, age):
         return scarplet.calculate_best_fit_parameters(data, Scarp, d, age)
 
-    def process(self, ages):
+    def process(self, d, ages):
         self.load_data()
-        d = 100
+        self.d = d
         for age in ages:
             self.set_params(age, d)
             self.save_template_match()
@@ -64,9 +66,6 @@ class Matcher(object):
 
     def set_source(self, source):
         self.source = source
-        data = dem.DEMGrid(source)
-        self.dx = data._georef_info.dx
-        self.dy = data._georef_info.dy
 
       
 class Reducer(object):
@@ -90,13 +89,20 @@ class Reducer(object):
     def reduce(self):
         results = os.listdir(self.path)
         
-        while len(results) > 1:
-            results1 = results.pop()
-            results2 = results.pop()
-            self.compare(results1, results2)
+        files_processed = 0
+        while files_processed < self.num_workers - 1: 
+            if len(results) > 1:
+                results1 = results.pop()
+                results2 = results.pop()
+                self.compare(results1, results2)
+                files_processed += 1
             results = os.listdir(self.path)
+
         self.best_results = os.listdir(self.path)[0]
 
+    def set_num_workers(self, num_workers):
+        self.num_workers = num_workers
+    
     def set_path(self, path):
         self.path = path
                 

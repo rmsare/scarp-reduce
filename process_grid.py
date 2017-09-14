@@ -4,29 +4,43 @@ import dem, scarplet
 from timeit import default_timer as timer
 from Worker import Matcher, Reducer
 
-# Divide grid into standard size chunks... 100 
+PAD_DX = 250
+PAD_DY = 250
+
+# Divide grid into standard size chunks... 
 
 # For each chunk:
 
 # Save chunk on EFS volume in /efs/data/
+# upload_data()
 
 # Pad data
-source = '/efs/data/carrizo.tif'
+#current_tile = tiles.pop()
+current_tile = '/efs/data/carrizo.tif'
+tile_name = current.tile.split('/')[-1][:-4]
+os.mkdir('/efs/results/' + tile_name)
+
+data = dem.DEMGrid(current_tile)
+data._pad_data_boundary(PAD_DX, PAD_DY)
+data.save(current_tile)
 
 # Divide up parameter space into k subsets
 # Launch k Matcher instances
 # Autoscaling group?
-worker = Matcher(source)    
+num_workers = 1
+worker = Matcher(current_tile)    
 
 # Match templates
-ages = [0]
+d = 100
+ages = [0, 10]
 start = timer()
-worker.process(ages)
+worker.process(d, ages)
 stop = timer()
 print('Fits:\t\t {} s per template'.format((stop-start)/len(ages)))
 
 # Launch Reducer instance
-reducer = Reducer('/efs/results')
+reducer = Reducer('/efs/results/' + tile_name)
+reducer.set_num_workers(num_workers)
 
 # Reduce results as they arrive
 start = timer()
