@@ -109,7 +109,7 @@ class Reducer(object):
                 results2 = results.pop()
                 self.compare(results1, results2)
                 files_processed += 1
-                start = timer()
+                stop = timer()
                 print("Compared {} and {}".format(results1, results2))
                 print("Elapsed time:\t {:.2f} s".format(stop-start))
             results = os.listdir(self.path)
