@@ -8,6 +8,7 @@ import numpy as np
 
 import uuid
 
+from time import sleep
 from timeit import default_timer as timer
 
 from WindowedTemplate import Scarp
@@ -54,6 +55,7 @@ class Matcher(object):
     def process(self, d, ages):
         self.load_data()
         self.d = d
+
         for age in ages:
             start = timer()
             self.set_params(age, d)
@@ -71,6 +73,7 @@ class Matcher(object):
         self.age = age
         self.d = d
         self.filename = 'results_{:.2f}.npy'.format(self.age)
+        #self.filename = 'results_{:.2f}_{:.2f}.npy'.format(self.angle, self.age)
 
     def set_source(self, source):
         self.source = source
@@ -100,6 +103,7 @@ class Reducer(object):
         files_processed = 0
         while files_processed < self.num_files - 1: 
             if len(results) > 1:
+                sleep(1) # XXX: this is to avoid reading in a npy array as it is being written to disk
                 results1 = results.pop()
                 results2 = results.pop()
                 self.compare(results1, results2)
