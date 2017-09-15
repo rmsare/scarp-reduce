@@ -8,6 +8,8 @@ import numpy as np
 
 import uuid
 
+from timeit import default_timer as timer
+
 from WindowedTemplate import Scarp
 
 
@@ -30,39 +32,45 @@ class Matcher(object):
     def __init__(self, source):
         self.age = None
         self. d = None
-        self.path = '/efs/results/'
+        name = source.split('/')[-1][:-4]
+        self.path = '/efs/results/' + name + '/'
         self.source = source    
 
-    def clip_results(pad_dx, pad_dy):
-        i = pad_dx / self.dx
-        j = pad_dy / self.dy
+    def clip_results(self, pad_dx, pad_dy):
+        i = int(pad_dx / self.dx)
+        j = int(pad_dy / self.dy)
         self.results = self.results[:, j:-j, i:-i]
 
     def load_data(self):
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
-        #self.data._pad_boundary(PAD_DX, PAD_DY) # Pad data once
+        self.data._pad_boundary(PAD_DX, PAD_DY) # TODO: Pad data once and save
     
-    def match_template(self, data, d, age):
-        return scarplet.calculate_best_fit_parameters(data, Scarp, d, age)
+    def match_template(self):
+        #return scarplet.calculate_fit(self.data, Scarp, self.d, self.age, self.angle)
+        return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age)
 
     def process(self, d, ages):
         self.load_data()
         self.d = d
         for age in ages:
+            start = timer()
             self.set_params(age, d)
             self.save_template_match()
+            stop = timer()
+            print("Fit template for {}, params d={:.0f}, kt={:.2f}".format(self.source, self.d, age))
+            print("Elapsed time:\t {:.2f} s".format(stop-start))
 
     def save_template_match(self):
-        self.results = self.match_template(self.data, self.d, self.age)
+        self.results = self.match_template()
         self.clip_results(PAD_DX, PAD_DY) # Assume data is padded!
         np.save(self.path + self.filename, self.results)
 
     def set_params(self, age, d):
         self.age = age
         self.d = d
-        self.filename = 'results_' + str(self.age) + '.npy'
+        self.filename = 'results_{:.2f}.npy'.format(self.age)
 
     def set_source(self, source):
         self.source = source
@@ -90,7 +98,7 @@ class Reducer(object):
         results = os.listdir(self.path)
         
         files_processed = 0
-        while files_processed < self.num_workers - 1: 
+        while files_processed < self.num_files - 1: 
             if len(results) > 1:
                 results1 = results.pop()
                 results2 = results.pop()
@@ -100,8 +108,8 @@ class Reducer(object):
 
         self.best_results = os.listdir(self.path)[0]
 
-    def set_num_workers(self, num_workers):
-        self.num_workers = num_workers
+    def set_num_files(self, num_files):
+        self.num_files = num_files
     
     def set_path(self, path):
         self.path = path
