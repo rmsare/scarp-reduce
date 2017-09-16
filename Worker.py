@@ -37,7 +37,7 @@ class Matcher(object):
         name = source.split('/')[-1][:-4]
         self.path = '/efs/results/' + name + '/'
         if not os.path.exists(self.path):
-            os.mkdir(self.path
+            os.mkdir(self.path)
 
         self.source = source    
 
