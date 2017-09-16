@@ -57,6 +57,7 @@ class Matcher(object):
         return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age)
 
     def process(self, d, ages):
+        print("Processing {}...".format(self.source))
         self.load_data()
         self.d = d
 
@@ -103,6 +104,7 @@ class Reducer(object):
         np.save(self.path + filename, data2)
         
     def reduce(self):
+        print("Reducing results in {}...".format(self.path))
         results = os.listdir(self.path)
         
         files_processed = 0
