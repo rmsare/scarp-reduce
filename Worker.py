@@ -8,7 +8,7 @@ import numpy as np
 
 import uuid
 
-from s3util improt save_file_to_s3
+from s3utils import save_file_to_s3
 
 from time import sleep
 from timeit import default_timer as timer
@@ -127,7 +127,7 @@ class Reducer(object):
 
     def save_best_results(self):
         if self.path[-1] == '/':
-            self.path = self.path[:-2]
+            self.path = self.path[:-1]
         name = self.path.split('/')[-1]
         save_file_to_s3(self.best_results, name + '/best_results.npy', bucket_name='scarp-testing')
 
