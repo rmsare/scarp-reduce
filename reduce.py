@@ -7,7 +7,8 @@ from Worker import Matcher, Reducer
 
 
 if __name__ == "__main__":
-    num_files = 35
+
+    num_files = int(sys.argv[1])
     for tile in os.listdir('/efs/data/'):
         tile_name = tile.split('.')[0] + '/'
         # Launch Reducer instance
@@ -23,3 +24,4 @@ if __name__ == "__main__":
         # Convert best results to TIFF
 
         # Save best results to S3
+        reducer.save_best_results()
