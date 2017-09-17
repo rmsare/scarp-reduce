@@ -8,6 +8,8 @@ import numpy as np
 
 import uuid
 
+from s3util improt save_file_to_s3
+
 from time import sleep
 from timeit import default_timer as timer
 
@@ -121,7 +123,13 @@ class Reducer(object):
                 print("Elapsed time:\t {:.2f} s".format(stop-start))
             results = os.listdir(self.path)
 
-        self.best_results = os.listdir(self.path)[0]
+        self.best_results = self.path + os.listdir(self.path)[0]
+
+    def save_best_results(self):
+        if self.path[-1] == '/':
+            self.path = self.path[:-2]
+        name = self.path.split('/')[-1]
+        save_file_to_s3(self.best_results, name + '/best_results.npy', bucket_name='scarp-testing')
 
     def set_num_files(self, num_files):
         self.num_files = num_files
