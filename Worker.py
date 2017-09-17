@@ -64,12 +64,12 @@ class Matcher(object):
         self.d = d
 
         for age in ages:
-            start = timer()
+            #start = timer()
             self.set_params(age, d)
             self.save_template_match()
-            stop = timer()
-            print("Fit template for {}, params d={:.0f}, kt={:.2f}".format(self.source, self.d, age))
-            print("Elapsed time:\t {:.2f} s".format(stop-start))
+            #stop = timer()
+            #print("Fit template for {}, params d={:.0f}, kt={:.2f}".format(self.source, self.d, age))
+            #print("Elapsed time:\t {:.2f} s".format(stop-start))
 
     def save_template_match(self):
         self.results = self.match_template()
@@ -119,8 +119,8 @@ class Reducer(object):
                 self.compare(results1, results2)
                 files_processed += 1
                 stop = timer()
-                print("Compared {} and {}".format(results1, results2))
-                print("Elapsed time:\t {:.2f} s".format(stop-start))
+                #print("Compared {} and {}".format(results1, results2))
+                #print("Elapsed time:\t {:.2f} s".format(stop-start))
             results = os.listdir(self.path)
 
         self.best_results = self.path + os.listdir(self.path)[0]
