@@ -1,4 +1,6 @@
 import os, sys
+import numpy as np 
+
 sys.path.append('/home/ubuntu/scarplet-python/scarplet')
 import dem, scarplet
 
@@ -9,7 +11,7 @@ from Worker import Matcher, Reducer
 
 
 if __name__ == "__main__":
-    remote_data_directory = 'ot-ncal-test'
+    remote_data_directory = 'ot-ncal-test/'
     local_data_directory = '/efs/data/'
     local_mask_directory = '/efs/masks/'
     bucket_name = 'scarp-data'
@@ -18,9 +20,8 @@ if __name__ == "__main__":
     for tile in tiles:
         download_data_from_s3(remote_data_directory + '/' + tile, local_data_directory + tile, bucket_name)
         tile_name = tile.split('/')[-1][:-4]
-        os.mkdir('/efs/results/' + tile_name)
-
-        data = dem.DEMGrid(local_data_directory + tile)
-        data._fill_nodata()
-        data.save(local_data_directory + tile)
-        np.save(local_mask_directory + tile.split('.')[0] + '_mask.npy', data.nodata_mask)
+        mask_filename = tile.split('.')[0] + '_mask.npy'
+        download_data_from_s3(remote_data_directory + '/mask/' + mask_filename, local_mask_directory + mask_filename)
+        
+        if not os.path.exists('/efs/results/' + tile_name):
+            os.mkdir('/efs/results/' + tile_name)
