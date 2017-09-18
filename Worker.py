@@ -8,6 +8,8 @@ import numpy as np
 
 import uuid
 
+from s3utils import save_file_to_s3
+
 from time import sleep
 from timeit import default_timer as timer
 
@@ -33,40 +35,49 @@ class Matcher(object):
     def __init__(self, source):
         self.age = None
         self. d = None
+
         name = source.split('/')[-1][:-4]
         self.path = '/efs/results/' + name + '/'
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
+
         self.source = source    
 
-    def clip_results(self, pad_dx, pad_dy):
+    def get_clip_boundaries(self, pad_dx, pad_dy):
         i = int(pad_dx / self.dx)
         j = int(pad_dy / self.dy)
-        self.results = self.results[:, j:-j, i:-i]
+        return i, j
 
     def load_data(self):
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
-        self.data._pad_boundary(PAD_DX, PAD_DY) # TODO: Pad data once and save
+        #self.data._fill_nodata() # TODO: Fill nodata once
+        #self.data._pad_boundary(PAD_DX, PAD_DY) # TODO: Pad data once and save
     
     def match_template(self):
         return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age)
 
     def process(self, d, ages):
+        print("Processing {}...".format(self.source))
         self.load_data()
         self.d = d
 
         for age in ages:
-            start = timer()
+            #start = timer()
             self.set_params(age, d)
             self.save_template_match()
-            stop = timer()
-            print("Fit template for {}, params d={:.0f}, kt={:.2f}".format(self.source, self.d, age))
-            print("Elapsed time:\t {:.2f} s".format(stop-start))
+            #stop = timer()
+            #print("Fit template for {}, params d={:.0f}, kt={:.2f}".format(self.source, self.d, age))
+            #print("Elapsed time:\t {:.2f} s".format(stop-start))
 
     def save_template_match(self):
         self.results = self.match_template()
         #self.clip_results(PAD_DX, PAD_DY) # Assume data is padded!
+        #i, j = self.get_clip_boundaries(PAD_DX, PAD_DY) # Assume data is padded!
+        #np.save(self.path + self.filename, self.results[:, j:-j, i:-i])
         np.save(self.path + self.filename, self.results)
+        del self.results
 
     def set_params(self, age, d):
         self.age = age
@@ -96,6 +107,7 @@ class Reducer(object):
         np.save(self.path + filename, data2)
         
     def reduce(self):
+        print("Reducing results in {}...".format(self.path))
         results = os.listdir(self.path)
         
         files_processed = 0
@@ -108,11 +120,17 @@ class Reducer(object):
                 self.compare(results1, results2)
                 files_processed += 1
                 stop = timer()
-                print("Compared {} and {}".format(results1, results2))
-                print("Elapsed time:\t {:.2f} s".format(stop-start))
+                #print("Compared {} and {}".format(results1, results2))
+                #print("Elapsed time:\t {:.2f} s".format(stop-start))
             results = os.listdir(self.path)
 
-        self.best_results = os.listdir(self.path)[0]
+        self.best_results = self.path + os.listdir(self.path)[0]
+
+    def save_best_results(self):
+        if self.path[-1] == '/':
+            self.path = self.path[:-1]
+        name = self.path.split('/')[-1]
+        save_file_to_s3(self.best_results, name + '/best_results.npy', bucket_name='scarp-testing')
 
     def set_num_files(self, num_files):
         self.num_files = num_files
