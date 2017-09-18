@@ -5,7 +5,7 @@ sys.path.append('/home/rmsare/src/scarplet-python/scarplet')
 import dem, scarplet
 
 
-from s3utils import download_data_from_s3, list_dir_s3
+from s3utils import download_data_from_s3, save_file_to_s3 
 
 from timeit import default_timer as timer
 from Worker import Matcher, Reducer
@@ -14,10 +14,9 @@ from Worker import Matcher, Reducer
 if __name__ == "__main__":
     remote_data_directory = 'ot-ncal/'
     #remote_directory = sys.argv[1]
-    #local_data_directory = '/efs/data/'
-    #local_mask_directory = '/efs/masks/'
-    local_data_directory = '/media/rmsare/GALLIUMOS/data/ot_data/tif/'
-    local_mask_directory = '/media/rmsare/GALLIUMOS/data/ot_data/mask/'
+    #local_data_directory = '/media/rmsare/GALLIUMOS/data/ot_data/tif/'
+    #local_mask_directory = '/media/rmsare/GALLIUMOS/data/ot_data/mask/'
+    local_data_directory ='tif/'
 
     bucket_name = 'scarp-data'
     #tiles = list_dir_s3(remote_data_directory, bucket_name)
