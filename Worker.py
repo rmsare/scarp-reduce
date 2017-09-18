@@ -52,7 +52,6 @@ class Matcher(object):
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
-        #self.data._fill_nodata() # TODO: Fill nodata once
         #self.data._pad_boundary(PAD_DX, PAD_DY) # TODO: Pad data once and save
     
     def match_template(self):
@@ -91,7 +90,10 @@ class Matcher(object):
 class Reducer(object):
 
     def __init__(self, path):
+        if path[-1] == '/':
+            path = path[:-1]
         self.path = path
+        self.tile_name = path.split('/')[-1]
         self.best_results = None
         
     def compare(self, file1, file2):
@@ -105,7 +107,11 @@ class Reducer(object):
         
         filename = uuid.uuid4().hex + '.npy'
         np.save(self.path + filename, data2)
-        
+    
+    def mask_results(self):
+        mask = np.load('/efs/masks/' + self.tile_name + '_mask.npy')
+        self.best_results[:, mask] = np.nan
+
     def reduce(self):
         print("Reducing results in {}...".format(self.path))
         results = os.listdir(self.path)
@@ -127,10 +133,8 @@ class Reducer(object):
         self.best_results = self.path + os.listdir(self.path)[0]
 
     def save_best_results(self):
-        if self.path[-1] == '/':
-            self.path = self.path[:-1]
-        name = self.path.split('/')[-1]
-        save_file_to_s3(self.best_results, name + '/best_results.npy', bucket_name='scarp-testing')
+        self.mask_results()
+        save_file_to_s3(self.best_results, self.tile_name + '/best_results.npy', bucket_name='scarp-testing')
 
     def set_num_files(self, num_files):
         self.num_files = num_files
