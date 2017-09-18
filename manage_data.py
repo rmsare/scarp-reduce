@@ -7,14 +7,13 @@ from s3utils import download_data_from_s3, list_dir_s3
 from timeit import default_timer as timer
 from Worker import Matcher, Reducer
 
-PAD_DX = 250
-PAD_DY = 250
 
 if __name__ == "__main__":
-    remote_data_directory = 'ot-ncal'
+    remote_data_directory = 'ot-ncal-test'
     local_data_directory = '/efs/data/'
+    local_mask_directory = '/efs/masks/'
     bucket_name = 'scarp-data'
-    tiles = list_dir_s3(data_directory, bucket_name)
+    tiles = list_dir_s3(remote_data_directory, bucket_name)
 
     for tile in tiles:
         download_data_from_s3(remote_data_directory + '/' + tile, local_data_directory + tile, bucket_name)
@@ -22,5 +21,6 @@ if __name__ == "__main__":
         os.mkdir('/efs/results/' + tile_name)
 
         data = dem.DEMGrid(local_data_directory + tile)
-        data._pad_data_boundary(PAD_DX, PAD_DY)
+        data._fill_nodata()
         data.save(local_data_directory + tile)
+        np.save(local_mask_directory + tile.split('.')[0] + '_mask.npy', data.nodata_mask)
