@@ -163,9 +163,9 @@ class Reducer(object):
     def save_results(self):
         subgrids = os.listdir(self.path)
         for tile in subgrids:
-            best_file = self.path + '/' + tile + '/' + os.listdir(tile)[0]
+            best_file = self.path + '/' + tile + '/' + os.listdir(self.path + '/' + tile)[0]
             results = np.load(best_file)    
-            results = mask_results(tile, results)
+            results = self.mask_results(tile, results)
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
 
