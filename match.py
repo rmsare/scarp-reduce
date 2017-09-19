@@ -23,6 +23,12 @@ if __name__ == "__main__":
 
     local_data_directory = '/efs/data/'
     tiles = os.listdir(local_data_directory)
+    local_results_directory = '/efs/results/'
+    for tile in tiles:
+        result_dir = local_results_directory + tile
+        if not os.path.exists(result_dir):
+            os.mkdir(result_dir)
+
 
     for tile in tiles:
         worker = Matcher(local_data_directory + tile)
