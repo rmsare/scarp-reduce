@@ -22,4 +22,4 @@ if __name__ == "__main__":
     # Convert best results to TIFF
 
     # Save best results to S3
-    #reducer.save_best_results()
+    reducer.save_results()
