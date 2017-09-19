@@ -135,25 +135,30 @@ class Reducer(object):
         self.best_results = self.path + os.listdir(self.path)[0]
 
     def reduce_all_results(self):
+        curdir = os.getcwd()
         subgrids = os.listdir(self.path)
+        os.chdir(self.path)
         
         files_processed = 0
         num_subgrids = len(subgrids)
         total_files = num_subgrids*(self.num_files - 1)
         while files_processed < total_files:
             for directory in subgrids:
-                results = os.listdir(self.path + directory)
+                os.chdir(directory)
+                results = os.listdir(directory)
                 if len(results) > 1:
-                    results1 = directory + '/' + results.pop()
-                    results2 = directory + '/' + results.pop()
+                    results1 = results.pop()
+                    results2 = results.pop()
                     best = self.compare(results1, results2)
                     filename = uuid.uuid4().hex + '.npy'
                     np.save(self.path + directory + '/' + filename, best)
                     files_processed += 1
+                os.chdir('..')
 
         for tile in subgrids:
-            best_file = os.listdir(self.path + tile)[0]
-            save_file_to_s3(self.path + tile + '/' + best_file, tile + '_results.npy', bucket_name='scarp-tesing')
+            best_file = os.listdir(tile)[0]
+            save_file_to_s3(tile + '/' + best_file, tile + '_results.npy', bucket_name='scarp-tesing')
+        os.chdir(curdir)
 
     def save_best_results(self):
         save_file_to_s3(self.best_results, self.tile_name + '_results.npy', bucket_name='scarp-testing')
