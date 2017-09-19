@@ -31,6 +31,7 @@ if __name__ == "__main__":
         data = dem.DEMGrid(local_data_directory + tile)
         data._fill_nodata()
         data.save(local_data_directory + tile)
+        save_file_to_s3(local_data_directory + tile, remote_data_directory + 'tif/' + tile, bucket_name=bucket_name)
 
         print ("uploading...")
         mask_filename = tile.split('.')[0] + '_mask.npy'
