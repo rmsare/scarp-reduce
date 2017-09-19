@@ -121,7 +121,7 @@ class Reducer(object):
         files_processed = 0
         while files_processed < self.num_files - 1: 
             if len(results) > 1:
-                sleep(1) # XXX: this is to avoid reading in a npy array as it is being written to disk
+                sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
                 results1 = results.pop()
                 results2 = results.pop()
                 best = self.compare(results1, results2)
@@ -138,16 +138,16 @@ class Reducer(object):
         subgrids = os.listdir(self.path)
         os.chdir(self.path)
 
-        start = timer()
-        
         files_processed = 0
         num_subgrids = len(subgrids)
         total_files = num_subgrids*(self.num_files - 1)
+        print("expected {} files".format(total_files))
         while files_processed < total_files:
             for directory in subgrids:
                 results = os.listdir(directory)
                 os.chdir(directory)
                 if len(results) > 1:
+                    sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
                     results1 = results.pop()
                     results2 = results.pop()
                     best = self.compare(results1, results2)
@@ -155,17 +155,16 @@ class Reducer(object):
                     np.save(filename, best)
                     files_processed += 1
                 os.chdir('..')
+        print("processed {} files".format(files_processed))
         os.chdir(curdir)
                 
-        stop = timer()
-        print("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_results(self):
         subgrids = os.listdir(self.path)
         for tile in subgrids:
-            best_file = self.path + '/' + tile + '/' + os.listdir(tile)[0]
+            best_file = self.path + '/' + tile + '/' + os.listdir(self.path + '/' + tile)[0]
             results = np.load(best_file)    
-            results = mask_results(tile, results)
+            results = self.mask_results(tile, results)
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
 
