@@ -115,7 +115,6 @@ class Reducer(object):
     def reduce(self, folder):
         curdir = os.getcwd()
         self.path = self.path + '/' + folder
-        print("Reducing results in {}...".format(self.path))
         results = os.listdir(self.path)
         os.chdir(self.path)
         
@@ -138,7 +137,6 @@ class Reducer(object):
         curdir = os.getcwd()
         subgrids = os.listdir(self.path)
         os.chdir(self.path)
-        print("in: {}".format(os.getcwd()))
 
         start = timer()
         
