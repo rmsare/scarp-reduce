@@ -95,14 +95,11 @@ if __name__ == "__main__":
 
     d = 100 
     min_age = 0
-    max_age = 3.2 
+    max_age = 3.5 
     d_age = 0.1
     num_ages = int((max_age - min_age) / d_age)
     ages = np.linspace(min_age, max_age, num_ages) 
 
-    #upload_data(data_dir, remote_dir)
-    #launch_reducer()
-    
     print("Launching {} nodes...".format(num_ages))
     workers = [launch_worker() for _ in range(num_ages)]
     
@@ -120,4 +117,5 @@ if __name__ == "__main__":
     #reducer_instance = launch_reducer()
     #reducer_script = REDUCER_SCRIPT.format(num_ages)
     #upload_and_run_script(reducer_script, reducer_instance)
+    #print("{}: Started reducer".format(reducer_instance.public_dns_name))
 
