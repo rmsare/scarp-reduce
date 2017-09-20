@@ -114,8 +114,10 @@ class Reducer(object):
     def mask_results(self, tile_name, results):
         # Mask out nodata in results ndarray using saved mask
 
-        mask = np.load('/efs/masks/' + tile_name + '_mask.npy')
-        results[:, mask] = np.nan
+        if os.path.exists('/efs/masks/' + tile_name + '_mask.npy'):
+            mask = np.load('/efs/masks/' + tile_name + '_mask.npy')
+            results[:, mask] = np.nan
+
         return results
 
     def reduce(self, directory):
