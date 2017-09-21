@@ -2,7 +2,7 @@ AWS_BUCKET_NAME = 'scarp-data'
 AWS_INSTANCE_TYPE = 'c4.xlarge'
 AWS_KEY_NAME = 'aws-scarp'
 AWS_SECURITY_GROUP = 'sg-2b925f50'
-AWS_WORKER_AMI = 'ami-57c8342f'
+AWS_WORKER_AMI = 'ami-c2c438ba'
 
 SSH_LOCAL_KEY = '/home/rmsare/aws_keys/aws-scarp.pem'
 
