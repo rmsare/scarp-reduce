@@ -10,11 +10,13 @@ from Worker import Matcher, Reducer
 
 if __name__ == "__main__":
 
-    logger = logging.getLogger(__name__)
+    logging.config.fileConfig('logging.conf')
+    logger = logging.getLogger('scarp_reduce')
 
     d = np.float(sys.argv[1])
     age = np.float(sys.argv[2])
     ages = [age]
+
    # min_age = np.float(sys.argv[2])
    # max_age = np.float(sys.argv[3])
    # d_age = 0.1
@@ -29,13 +31,13 @@ if __name__ == "__main__":
     tiles = os.listdir(local_data_directory)
     local_results_directory = '/efs/results/'
     for tile in tiles:
-        result_dir = local_results_directory + tile
+        result_dir = local_results_directory + tile[:-4]
         if not os.path.exists(result_dir):
             os.mkdir(result_dir)
 
     for tile in tiles:
         logger.info("Starting Matcher for {}".format(tile))
-        worker = Matcher(local_data_directory + tile)
+        worker = Matcher(local_data_directory + tile) 
         worker.process(d, ages)
         logger.info("Finished processing {}".format(tile))
         
