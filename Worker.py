@@ -24,6 +24,8 @@ MAX_AGE = 3.5
 PAD_DX = 250
 PAD_DY = 250
 
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger('scarp_reduce.Worker')
 
 class Worker(object):
 
@@ -33,13 +35,13 @@ class Worker(object):
 
 class Matcher(object):
     
-    def __init__(self, source):
+    def __init__(self, source, base_path='/efs/results/'):
         self.age = None
         self. d = None
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger or logging.getLogger(__name__)
 
         name = source.split('/')[-1][:-4]
-        self.path = '/efs/results/' + name + '/'
+        self.path = base_path + name + '/'
         if not os.path.exists(self.path):
             os.mkdir(self.path)
 
@@ -53,6 +55,7 @@ class Matcher(object):
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
         self.data._pad_boundary(PAD_DX, PAD_DY) # TODO: Pad data once and save
+        self.logger.info("Loaded data from {}".format(self.source))
     
     def match_template(self):
         # Match template to data
@@ -71,6 +74,7 @@ class Matcher(object):
             self.save_template_match()
         stop = timer()
         self.logger.info("Processed:\t {}".format(self.source))
+        self.logger.info("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
         self.logger.info("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
@@ -102,7 +106,7 @@ class Reducer(object):
         self.path = path
         self.tile_name = path.split('/')[-1]
         self.best_results = None
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger or logging.getLogger(__name__)
         
     def compare(self, file1, file2):
         # Compare two search step results ndarrays
@@ -114,7 +118,7 @@ class Reducer(object):
         
         os.remove(file1)
         os.remove(file2)
-        self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd())) 
+        self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd().split('/')[-1])) 
         return data2
     
     def mask_results(self, tile_name, results):
@@ -158,9 +162,11 @@ class Reducer(object):
 
         start = timer()
 
-        files_processed = 0
         num_subgrids = len(subgrids)
         total_files = num_subgrids*(self.num_files - 1)
+        self.logger.info("Expecting:\t {} files".format(total_files))
+
+        files_processed = 0
         while files_processed < total_files:
             for directory in subgrids:
                 results = os.listdir(directory)
@@ -176,8 +182,8 @@ class Reducer(object):
                 os.chdir('..')
 
         stop = timer()
-        average_time = (stop - start) / (num_subgrids * num_files)
-        self.logger.info("Processed:\t\t {} files".format(files_processed))
+        average_time = (stop - start) / (num_subgrids * self.num_files)
+        self.logger.info("Processed:\t {} files".format(files_processed))
         self.logger.info("Average processing time: {:.2f} s per file".format(average_time)) 
 
         os.chdir(curdir)
