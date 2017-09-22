@@ -6,6 +6,7 @@ import os
 import dem, scarplet
 import numpy as np
 
+import logging 
 import uuid
 
 from s3utils import save_file_to_s3
@@ -35,6 +36,7 @@ class Matcher(object):
     def __init__(self, source):
         self.age = None
         self. d = None
+        self.logger = logging.getLogger(__name__)
 
         name = source.split('/')[-1][:-4]
         self.path = '/efs/results/' + name + '/'
@@ -60,13 +62,16 @@ class Matcher(object):
     def process(self, d, ages):
         # Match templates for a list of parameters
 
-        print("Processing {}...".format(self.source))
+        start = timer()
         self.load_data()
         self.d = d
-
+        
         for age in ages:
             self.set_params(age, d)
             self.save_template_match()
+        stop = timer()
+        self.logger.info("Processed:\t {}".format(self.source))
+        self.logger.info("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         # Match template, and save clipped (valid) results
@@ -97,6 +102,7 @@ class Reducer(object):
         self.path = path
         self.tile_name = path.split('/')[-1]
         self.best_results = None
+        self.logger = logging.getLogger(__name__)
         
     def compare(self, file1, file2):
         # Compare two search step results ndarrays
@@ -108,7 +114,7 @@ class Reducer(object):
         
         os.remove(file1)
         os.remove(file2)
-        
+        self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd())) 
         return data2
     
     def mask_results(self, tile_name, results):
@@ -127,7 +133,7 @@ class Reducer(object):
         self.path = self.path + '/' + directory
         results = os.listdir(self.path)
         os.chdir(self.path)
-        
+
         files_processed = 0
         while files_processed < self.num_files - 1: 
             if len(results) > 1:
@@ -150,10 +156,11 @@ class Reducer(object):
         subgrids = os.listdir(self.path)
         os.chdir(self.path)
 
+        start = timer()
+
         files_processed = 0
         num_subgrids = len(subgrids)
         total_files = num_subgrids*(self.num_files - 1)
-        print("expected {} files".format(total_files))
         while files_processed < total_files:
             for directory in subgrids:
                 results = os.listdir(directory)
@@ -167,7 +174,12 @@ class Reducer(object):
                     np.save(filename, best)
                     files_processed += 1
                 os.chdir('..')
-        print("processed {} files".format(files_processed))
+
+        stop = timer()
+        average_time = (stop - start) / (num_subgrids * num_files)
+        self.logger.info("Processed:\t\t {} files".format(files_processed))
+        self.logger.info("Average processing time: {:.2f} s per file".format(average_time)) 
+
         os.chdir(curdir)
                 
     def save_results(self):
@@ -181,6 +193,7 @@ class Reducer(object):
             results = self.mask_results(tile, results)
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
+            self.logger.info("Saved best results for {}".format(tile))
 
     def set_num_files(self, num_files):
         # Number of files per directory (= number of workers/search steps)
@@ -188,6 +201,7 @@ class Reducer(object):
         self.num_files = num_files
     
     def set_path(self, path):
+
         self.path = path
                 
 
