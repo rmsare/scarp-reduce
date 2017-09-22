@@ -1,5 +1,5 @@
 import os, sys
-sys.path.append('/home/ubuntu/scarplet-python/scarplet')
+sys.path.append('/home/rmsare/src/scarplet-python/scarplet')
 import dem, scarplet
 
 import logging
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # Launch Reducer instance
     logger.info("Starting Reducer")
-    reducer = Reducer('/ef/results/')
+    reducer = Reducer('/efs/results/')
     reducer.set_num_files(num_files)
 
     # Reduce results as they arrive
