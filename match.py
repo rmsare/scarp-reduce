@@ -3,11 +3,15 @@ sys.path.append('/home/ubuntu/scarplet-python/scarplet')
 
 import dem, scarplet
 import numpy as np
+import logging
 
 from timeit import default_timer as timer
 from Worker import Matcher, Reducer
 
 if __name__ == "__main__":
+
+    logger = logging.getLogger(__name__)
+
     d = np.float(sys.argv[1])
     age = np.float(sys.argv[2])
     ages = [age]
@@ -29,9 +33,10 @@ if __name__ == "__main__":
         if not os.path.exists(result_dir):
             os.mkdir(result_dir)
 
-
     for tile in tiles:
+        logger.info("Starting Matcher for {}".format(tile))
         worker = Matcher(local_data_directory + tile)
         worker.process(d, ages)
+        logger.info("Finished processing {}".format(tile))
         
         
