@@ -83,13 +83,31 @@ def upload_and_run_script(script, instance):
     for command in commands:
         subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)
     DEVNULL.close()
-    
-def upload_data(in_dir, out_dir):
 
-    for f in os.listdir(in_dir):
-        in_file = os.path.join(in_dir, f)
-        out_file = os.path.join(out_dir, f)
-        save_file_to_s3(in_file, out_file, bucket_name=AWS_BUCKET_NAME)
+def get_worker_instances():
+
+    connection = boto.ec2.connect_to_region('us-west-2')
+    reservations = connection.get_all_instances(filters={'tag:Name' : 'Worker'})
+    workers = [r.instances[0] for r in reservations if r.instances[0].state == u'running']
+    return workers
+
+def relaunch_jobs():
+
+    d = 100 
+    min_age = 0
+    max_age = 3.5 
+    d_age = 0.1
+    num_ages = int((max_age - min_age) / d_age)
+    ages = np.linspace(min_age, max_age, num_ages) 
+
+    workers = get_worker_instances()
+    
+    for age, instance in zip(ages, workers):
+        param = [d, age]
+        script = STARTUP_SCRIPT.format(param[0], param[1])
+        upload_and_run_script(script, instance)
+        instance.update()
+        print("RESTART: {} Started processing {:d} {:.2f}".format(instance.public_dns_name, d, age))
 
 if __name__ == "__main__":
 
@@ -109,7 +127,7 @@ if __name__ == "__main__":
         script = STARTUP_SCRIPT.format(param[0], param[1])
         upload_and_run_script(script, instance)
         instance.update()
-        print("{}: Started processing {:d} {:.2f}".format(instance.public_dns_name, d, age))
+        print("START: {} Started processing {:d} {:.2f}".format(instance.public_dns_name, d, age))
     stop = timer()
 
     print("Spin up:\t\t {:.2f} s".format(stop - start))
