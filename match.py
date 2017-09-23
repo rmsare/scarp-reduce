@@ -15,6 +15,8 @@ if __name__ == "__main__":
 
     d = np.float(sys.argv[1])
     age = np.float(sys.argv[2])
+    pad_dx = int(sys.argv[3])
+    pad_dy = int(sys.argv[4])
     ages = [age]
 
    # min_age = np.float(sys.argv[2])
@@ -37,7 +39,7 @@ if __name__ == "__main__":
 
     for tile in tiles:
         logger.info("Starting Matcher for {}".format(tile))
-        worker = Matcher(local_data_directory + tile) 
+        worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
         worker.process(d, ages)
         #logger.info("Finished processing {}".format(tile))
         

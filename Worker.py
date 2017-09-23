@@ -21,8 +21,6 @@ NUM_ANGLES = 181
 NUM_AGES = 35
 MAX_AGE = 3.5
 
-PAD_DX = 250
-PAD_DY = 250
 
 logging.config.fileConfig('logging.conf')
 logger = logging.getLogger('scarp_reduce.Worker')
@@ -35,9 +33,11 @@ class Worker(object):
 
 class Matcher(object):
     
-    def __init__(self, source, base_path='/efs/results/'):
+    def __init__(self, source, pad_dx, pad_dy, base_path='/efs/results/'):
         self.age = None
         self. d = None
+        self.pad_dx = pad_dx
+        self.pad_dy = pad_dy
         self.logger = logger or logging.getLogger(__name__)
 
         name = source.split('/')[-1][:-4]
@@ -49,7 +49,8 @@ class Matcher(object):
 
     def load_data(self):
         # Load data from source file
-
+        PAD_DX = self.pad_dx
+        PAD_DY = self.pad_dy
         # XXX: Assume data has been interpolated to remove nans
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
@@ -182,9 +183,9 @@ class Reducer(object):
                 os.chdir('..')
 
         stop = timer()
-        average_time = (stop - start) / (num_subgrids * self.num_files)
-        self.logger.info("Processed:\t {} files".format(files_processed))
-        self.logger.info("Average processing time: {:.2f} s per file".format(average_time)) 
+        average_time = (stop - start) / num_subgrids
+        self.logger.info("Processed:\t {} files".format(files_processed + num_subgrids))
+        self.logger.info("Average processing time: {:.2f} s per grid".format(average_time)) 
 
         os.chdir(curdir)
                 
@@ -196,7 +197,7 @@ class Reducer(object):
         for tile in subgrids:
             best_file = self.path + '/' + tile + '/' + os.listdir(self.path + '/' + tile)[0]
             results = np.load(best_file)    
-            results = self.mask_results(tile, results)
+            #results = self.mask_results(tile, results)
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
             self.logger.info("Saved best results for {}".format(tile))
