@@ -55,7 +55,7 @@ class Matcher(object):
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
-        self.data._pad_boundary(PAD_DX, PAD_DY) # TODO: Pad data once and save
+        self.data._pad_boundary(self.pad_dx, self.pad_dy) # TODO: Pad data once and save
         self.logger.info("Loaded data from {}".format(self.source))
     
     def match_template(self):
@@ -83,7 +83,7 @@ class Matcher(object):
 
         self.results = self.match_template()
         # XXX: Assume data is padded!
-        np.save(self.path + self.filename, self.results[:, PAD_DY:-PAD_DY, PAD_DX:-PAD_DX])
+        NP.SAVE(SELF.PATH + SELF.FILENAME, SELF.RESULTS[:, self.pad_dy:-self.pad_dy, self.pad_dx:-self.pad_dx])
         del self.results
 
     def set_params(self, age, d):
