@@ -118,7 +118,7 @@ class Reducer(object):
         
         os.remove(file1)
         os.remove(file2)
-        self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd().split('/')[-1])) 
+        #self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd().split('/')[-1])) 
         return data2
     
     def mask_results(self, tile_name, results):

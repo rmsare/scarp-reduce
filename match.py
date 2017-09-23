@@ -39,6 +39,6 @@ if __name__ == "__main__":
         logger.info("Starting Matcher for {}".format(tile))
         worker = Matcher(local_data_directory + tile) 
         worker.process(d, ages)
-        logger.info("Finished processing {}".format(tile))
+        #logger.info("Finished processing {}".format(tile))
         
         
