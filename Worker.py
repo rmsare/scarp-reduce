@@ -83,7 +83,7 @@ class Matcher(object):
 
         self.results = self.match_template()
         # XXX: Assume data is padded!
-        NP.SAVE(SELF.PATH + SELF.FILENAME, SELF.RESULTS[:, self.pad_dy:-self.pad_dy, self.pad_dx:-self.pad_dx])
+        np.save(self.path + self.filename, self.results[:, self.pad_dy:-self.pad_dy, self.pad_dx:-self.pad_dx])
         del self.results
 
     def set_params(self, age, d):
