@@ -38,7 +38,7 @@ if __name__ == "__main__":
             os.mkdir(result_dir)
 
     for tile in tiles:
-        logger.info("Starting Matcher for {}".format(tile))
+        #logger.info("Starting Matcher for {}".format(tile))
         worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
         worker.process(d, ages)
         #logger.info("Finished processing {}".format(tile))
