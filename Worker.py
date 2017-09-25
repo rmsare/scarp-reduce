@@ -56,7 +56,7 @@ class Matcher(object):
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
         self.data._pad_boundary(self.pad_dx, self.pad_dy) # TODO: Pad data once and save
-        self.logger.info("Loaded data from {}".format(self.source))
+        #self.logger.info("Loaded data from {}".format(self.source))
     
     def match_template(self):
         # Match template to data
@@ -74,9 +74,9 @@ class Matcher(object):
             self.set_params(age, d)
             self.save_template_match()
         stop = timer()
-        self.logger.info("Processed:\t {}".format(self.source))
-        self.logger.info("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
-        self.logger.info("Elapsed time:\t {:.2f} s".format(stop - start))
+        #self.logger.info("Processed:\t {}".format(self.source))
+        #self.logger.info("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
+        #self.logger.info("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         # Match template, and save clipped (valid) results
@@ -178,7 +178,7 @@ class Reducer(object):
                 results = os.listdir(directory)
                 os.chdir(directory)
                 if len(results) > 1:
-                    sleep(5) # XXX: this is to avoid reading in a npy array as it is being written to disk
+                    sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
                     results1 = results.pop()
                     results2 = results.pop()
                     try:
@@ -189,12 +189,12 @@ class Reducer(object):
                         subgrid_processed[i] += 1
                     except ValueError as e:
                         self.logger.info('ValueError: ' + str(e))
-                        self.loggder.info('Tried to read incomplete npy file')
-                if subgrid_processed[i] == self.num_files:
+                        self.logger.info('Tried to read incomplete npy file')
+                if subgrid_processed[i] == self.num_files - 1:
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
-
+                    self.save_best_result(directory)
                 os.chdir('..')
 
         stop = timer()
@@ -204,6 +204,18 @@ class Reducer(object):
 
         os.chdir(curdir)
                 
+    def save_best_result(self, directory):
+        tile = directory.strip('/')
+        best_file = os.listdir('.')[0]
+        results = np.load(best_file)    
+        results = self.mask_results(tile, results)
+        np.save('/efs/results/' + tile + '_results.npy', results)    
+        save_file_to_s3('/efs/results/' + tile + '_results.npy', tile + '_results.npy', bucket_name='scarp-testing')
+        save_tiff(results, tile)
+        best_tiff = '/efs/results' + tile + '_results.tif' 
+        save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
+        self.logger.info("Saved best results for {}".format(tile))
+
     def save_results(self):
         # Save all reduced results to S3 bucket
 
