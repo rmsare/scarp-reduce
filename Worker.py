@@ -216,7 +216,7 @@ class Reducer(object):
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
             save_tiff(results, tile)
-            best_tiff = '/efs/results' + tile + '_results.tif' 
+            best_tiff = '/efs/results/' + tile + '_results.tif' 
             save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
             self.logger.info("Saved best results for {}".format(tile))
 
