@@ -1,5 +1,5 @@
 import os, sys
-sys.path.append('/home/rmsare/src/scarplet-python/scarplet')
+sys.path.append('/home/ubuntu/scarplet-python/scarplet')
 import dem, scarplet
 
 import logging
