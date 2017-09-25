@@ -169,7 +169,7 @@ class Reducer(object):
         start = timer()
 
         num_subgrids = len(subgrids)
-        subgrid_processed = np.zeros((1, num_subgrids))
+        subgrid_processed = np.zeros(num_subgrids)
         total_files = num_subgrids*(self.num_files - 1)
         self.logger.info("Expecting:\t {} files".format(total_files))
 
