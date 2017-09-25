@@ -209,11 +209,12 @@ class Reducer(object):
         best_file = os.listdir('.')[0]
         results = np.load(best_file)    
         results = self.mask_results(tile, results)
-        np.save('/efs/results/' + tile + '_results.npy', results)    
-        save_file_to_s3('/efs/results/' + tile + '_results.npy', tile + '_results.npy', bucket_name='scarp-testing')
-        save_tiff(results, tile)
-        best_tiff = '/efs/results' + tile + '_results.tif' 
-        save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
+        np.save(tile + '_results.npy', results)    
+        save_file_to_s3(tile + '_results.npy', tile + '_results.npy', bucket_name='scarp-testing')
+        save_tiff(results, tile, results_dir='')
+        save_file_to_s3(tile + '_results.tif', tile + '_results.tif', bucket_name='scarp-testing')
+        os.remove(tile + '_results.npy')
+        os.remove(tile + '_results.tif')
         self.logger.info("Saved best results for {}".format(tile))
 
     def save_results(self):
