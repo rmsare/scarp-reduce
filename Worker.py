@@ -179,7 +179,7 @@ class Reducer(object):
                 results = os.listdir(directory)
                 os.chdir(directory)
                 if len(results) > 1:
-                    sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
+                    sleep(5) # XXX: this is to avoid reading in a npy array as it is being written to disk
                     results1 = results.pop()
                     results2 = results.pop()
                     best = self.compare(results1, results2)
