@@ -190,11 +190,11 @@ class Reducer(object):
                     except ValueError as e:
                         self.logger.info('ValueError: ' + str(e))
                         self.logger.info('Tried to read incomplete npy file')
-                if subgrid_processed[i] == self.num_files:
+                if subgrid_processed[i] == self.num_files - 1:
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
-
+                    self.save_best_result(directory)
                 os.chdir('..')
 
         stop = timer()
@@ -204,6 +204,18 @@ class Reducer(object):
 
         os.chdir(curdir)
                 
+    def save_best_result(self, directory):
+        tile = directory.strip('/')
+        best_file = os.listdir('.')[0]
+        results = np.load(best_file)    
+        results = self.mask_results(tile, results)
+        np.save('/efs/results/' + tile + '_results.npy', results)    
+        save_file_to_s3('/efs/results/' + tile + '_results.npy', tile + '_results.npy', bucket_name='scarp-testing')
+        save_tiff(results, tile)
+        best_tiff = '/efs/results' + tile + '_results.tif' 
+        save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
+        self.logger.info("Saved best results for {}".format(tile))
+
     def save_results(self):
         # Save all reduced results to S3 bucket
 
