@@ -195,6 +195,7 @@ class Reducer(object):
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
+                    subgrid_processed += 1
                 os.chdir('..')
 
         stop = timer()
