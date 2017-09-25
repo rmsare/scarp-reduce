@@ -11,8 +11,7 @@ import uuid
 
 from osgeo import gdal, osr
 
-from s3utils import save_file_to_s3
-from utils import save_tiff
+from s3utils import save_file_to_s3, save_tiff
 
 from time import sleep
 from timeit import default_timer as timer
@@ -169,7 +168,7 @@ class Reducer(object):
         start = timer()
 
         num_subgrids = len(subgrids)
-        subgrid_processed = np.zeros((1, num_subgrids))
+        subgrid_processed = np.zeros((num_subgrids))
         total_files = num_subgrids*(self.num_files - 1)
         self.logger.info("Expecting:\t {} files".format(total_files))
 
@@ -179,7 +178,7 @@ class Reducer(object):
                 results = os.listdir(directory)
                 os.chdir(directory)
                 if len(results) > 1:
-                    sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
+                    sleep(5) # XXX: this is to avoid reading in a npy array as it is being written to disk
                     results1 = results.pop()
                     results2 = results.pop()
                     best = self.compare(results1, results2)
@@ -212,8 +211,8 @@ class Reducer(object):
             results = self.mask_results(tile, results)
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
-            save_tiff(results, best_file)
-            best_tiff = best_file.replace('npy', 'tif')
+            save_tiff(results, tile)
+            best_tiff = '/efs/results' + tile + '_results.tif' 
             save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
             self.logger.info("Saved best results for {}".format(tile))
 
