@@ -9,7 +9,10 @@ import numpy as np
 import logging 
 import uuid
 
+from osgeo import gdal, osr
+
 from s3utils import save_file_to_s3
+from utils import save_tiff
 
 from time import sleep
 from timeit import default_timer as timer
@@ -21,9 +24,9 @@ NUM_ANGLES = 181
 NUM_AGES = 35
 MAX_AGE = 3.5
 
-
 logging.config.fileConfig('logging.conf')
 logger = logging.getLogger('scarp_reduce.Worker')
+
 
 class Worker(object):
 
@@ -49,8 +52,6 @@ class Matcher(object):
 
     def load_data(self):
         # Load data from source file
-        PAD_DX = self.pad_dx
-        PAD_DY = self.pad_dy
         # XXX: Assume data has been interpolated to remove nans
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
@@ -152,7 +153,7 @@ class Reducer(object):
                     files_processed += 1
                 except ValueError as e:
                     self.logger.info('ValueError: ' + str(e))
-                    self.logger.info('Tried to read incomplete npy file')
+                    self.loggder.info('Tried to read incomplete npy file')
             results = os.listdir('.')
 
         os.chdir(curdir)
@@ -168,12 +169,13 @@ class Reducer(object):
         start = timer()
 
         num_subgrids = len(subgrids)
+        subgrid_processed = np.zeros((1, num_subgrids))
         total_files = num_subgrids*(self.num_files - 1)
         self.logger.info("Expecting:\t {} files".format(total_files))
 
         files_processed = 0
         while files_processed < total_files:
-            for directory in subgrids:
+            for i, directory in enumerate(subgrids):
                 results = os.listdir(directory)
                 os.chdir(directory)
                 if len(results) > 1:
@@ -184,6 +186,12 @@ class Reducer(object):
                     filename = uuid.uuid4().hex + '.npy'
                     np.save(filename, best)
                     files_processed += 1
+                    subgrid_processed[i] += 1
+                if subgrid_processed[i] == self.num_files:
+                    now = timer()
+                    self.logger.info("Done with {}".format(directory))
+                    self.logger.info("Elapsed time: {:.2f} s".format(now - start))
+
                 os.chdir('..')
 
         stop = timer()
@@ -201,9 +209,12 @@ class Reducer(object):
         for tile in subgrids:
             best_file = self.path + '/' + tile + '/' + os.listdir(self.path + '/' + tile)[0]
             results = np.load(best_file)    
-            #results = self.mask_results(tile, results)
+            results = self.mask_results(tile, results)
             np.save(best_file, results)    
             save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
+            save_tiff(results, best_file)
+            best_tiff = best_file.replace('npy', 'tif')
+            save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
             self.logger.info("Saved best results for {}".format(tile))
 
     def set_num_files(self, num_files):
