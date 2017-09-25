@@ -182,11 +182,15 @@ class Reducer(object):
                     sleep(5) # XXX: this is to avoid reading in a npy array as it is being written to disk
                     results1 = results.pop()
                     results2 = results.pop()
-                    best = self.compare(results1, results2)
-                    filename = uuid.uuid4().hex + '.npy'
-                    np.save(filename, best)
-                    files_processed += 1
-                    subgrid_processed[i] += 1
+                    try:
+                        best = self.compare(results1, results2)
+                        filename = uuid.uuid4().hex + '.npy'
+                        np.save(filename, best)
+                        files_processed += 1
+                        subgrid_processed[i] += 1
+                    except ValueError as e:
+                        self.logger.info('ValueError: ' + str(e))
+                        self.loggder.info('Tried to read incomplete npy file')
                 if subgrid_processed[i] == self.num_files:
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
