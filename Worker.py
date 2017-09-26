@@ -127,36 +127,9 @@ class Reducer(object):
 
         if os.path.exists('/efs/masks/' + tile_name + '_mask.npy'):
             mask = np.load('/efs/masks/' + tile_name + '_mask.npy')
-            results[:, mask] = np.nan
+            results[:, ~mask] = np.nan
 
         return results
-
-    def reduce(self, directory):
-        # Reduce a single directory of results
-
-        curdir = os.getcwd()
-        self.path = self.path + '/' + directory
-        results = os.listdir(self.path)
-        os.chdir(self.path)
-
-        files_processed = 0
-        while files_processed < self.num_files - 1: 
-            if len(results) > 1:
-                sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
-                results1 = results.pop()
-                results2 = results.pop()
-                try:
-                    best = self.compare(results1, results2)
-                    filename = uuid.uuid4().hex + '.npy'
-                    np.save(filename, best)
-                    files_processed += 1
-                except ValueError as e:
-                    self.logger.info('ValueError: ' + str(e))
-                    self.loggder.info('Tried to read incomplete npy file')
-            results = os.listdir('.')
-
-        os.chdir(curdir)
-        self.best_results = self.path + os.listdir(self.path)[0]
 
     def reduce_all_results(self):
         # Reduce results in all directories until all search steps have been compared
@@ -168,33 +141,22 @@ class Reducer(object):
         start = timer()
 
         num_subgrids = len(subgrids)
-        subgrid_processed = np.zeros(num_subgrids)
+        self.subgrid_processed = np.zeros(num_subgrids)
         total_files = num_subgrids*(self.num_files - 1)
         self.logger.info("Expecting:\t {} files".format(total_files))
 
-        files_processed = 0
-        while files_processed < total_files:
+        self.files_processed = 0
+        while self.files_processed < total_files:
             for i, directory in enumerate(subgrids):
-                results = os.listdir(directory)
                 os.chdir(directory)
-                if len(results) > 1:
-                    sleep(2) # XXX: this is to avoid reading in a npy array as it is being written to disk
-                    results1 = results.pop()
-                    results2 = results.pop()
-                    try:
-                        best = self.compare(results1, results2)
-                        filename = uuid.uuid4().hex + '.npy'
-                        np.save(filename, best)
-                        files_processed += 1
-                        subgrid_processed[i] += 1
-                    except ValueError as e:
-                        self.logger.info('ValueError: ' + str(e))
-                        self.logger.info('Tried to read incomplete npy file')
-                if subgrid_processed[i] == self.num_files - 1:
+                if self.subgrid_processed[i] < self.num_files - 1:
+                    self.reduce_current_directory()
+                elif self.subgrid_processed[i] == self.num_files - 1:
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
+                    self.subgrid_processed[i] += 1
                 os.chdir('..')
 
         stop = timer()
@@ -204,6 +166,22 @@ class Reducer(object):
 
         os.chdir(curdir)
                 
+    def reduce_current_directory(self):
+        results = os.listdir('.')
+        while len(results) > 1:
+            results1 = results.pop()
+            results2 = results.pop()
+            try:
+                best = self.compare(results1, results2)
+                filename = uuid.uuid4().hex + '.npy'
+                np.save(filename, best)
+                self.files_processed += 1
+                self.subgrid_processed[i] += 1
+            except ValueError as e:
+                self.logger.info("ValueError: " + str(e))
+                self.logger.info("Tried to read incomplete npy file")
+            results = os.listdir('.')
+
     def save_best_result(self, directory):
         tile = directory.strip('/')
         best_file = os.listdir('.')[0]
