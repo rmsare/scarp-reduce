@@ -150,7 +150,7 @@ class Reducer(object):
             for i, directory in enumerate(subgrids):
                 os.chdir(directory)
                 if self.subgrid_processed[i] < self.num_files - 1:
-                    self.reduce_current_directory()
+                    self.reduce_current_directory(i)
                 elif self.subgrid_processed[i] == self.num_files - 1:
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
@@ -166,7 +166,7 @@ class Reducer(object):
 
         os.chdir(curdir)
                 
-    def reduce_current_directory(self):
+    def reduce_current_directory(self, i):
         results = os.listdir('.')
         while len(results) > 1:
             results1 = results.pop()
@@ -177,8 +177,8 @@ class Reducer(object):
                 np.save(filename, best)
                 self.files_processed += 1
                 self.subgrid_processed[i] += 1
-            except ValueError as e:
-                self.logger.info("ValueError: " + str(e))
+            except (IOError, ValueError) as e:
+                self.logger.info("Error: " + str(e))
                 self.logger.info("Tried to read incomplete npy file")
             results = os.listdir('.')
 
