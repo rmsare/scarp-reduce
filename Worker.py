@@ -169,6 +169,7 @@ class Reducer(object):
     def reduce_current_directory(self, i):
         results = os.listdir('.')
         while len(results) > 1:
+            time.sleep(2)
             results1 = results.pop()
             results2 = results.pop()
             try:
