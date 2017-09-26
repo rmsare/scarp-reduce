@@ -194,6 +194,7 @@ class Reducer(object):
         save_file_to_s3(tile + '_results.tif', tile + '_results.tif', bucket_name='scarp-testing')
         os.remove(tile + '_results.npy')
         os.remove(tile + '_results.tif')
+        os.remove(best_file)
         self.logger.info("Saved best results for {}".format(tile))
 
     def set_num_files(self, num_files):
