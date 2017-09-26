@@ -1,4 +1,5 @@
 import boto.ec2
+import boto.ec2.cloudwatch
 import os, time
 import subprocess
 import numpy as np
@@ -7,7 +8,7 @@ from timeit import default_timer as timer
 
 from boto.manage.cmdshell import sshclient_from_instance
 
-from settings import AWS_WORKER_AMI, AWS_BUCKET_NAME, AWS_INSTANCE_TYPE, AWS_KEY_NAME, AWS_SECURITY_GROUP, STARTUP_SCRIPT, SSH_LOCAL_KEY
+from settings import AWS_WORKER_AMI, AWS_BUCKET_NAME, AWS_REDUCER_INSTANCE_TYPE, AWS_WORKER_INSTANCE_TYPE, AWS_KEY_NAME, AWS_SECURITY_GROUP, STARTUP_SCRIPT, SSH_LOCAL_KEY
 
 MAX_RETRIES = 100
 
@@ -17,7 +18,7 @@ def launch_workers(num_workers):
     new_reservation = connection.run_instances(
                                     AWS_WORKER_AMI,
                                     key_name=AWS_KEY_NAME,
-                                    instance_type=AWS_INSTANCE_TYPE,
+                                    instance_type=AWS_WORKER_INSTANCE_TYPE,
                                     security_group_ids=[AWS_SECURITY_GROUP],
                                     min_count=num_workers,
                                     max_count=num_workers)
@@ -25,7 +26,7 @@ def launch_workers(num_workers):
     for instance in new_reservation.instances:
         connection.create_tags([instance.id], 
                                 {"Name" : "Worker"})
-
+    
     #print("Launched worker: d = {:.2f}, age = {:.2f}".format(param[0], param[1]))
     #print("Public DNS: {}".format(dns))
     #print("State: {}".format(instance.state))
@@ -33,13 +34,33 @@ def launch_workers(num_workers):
 
     return new_reservation.instances
 
+def add_alarm_to_instances(instances):
+
+    connection = boto.ec2.cloudwatch.connect_to_region('us-west-2')
+    topic = 'arn:aws:sns:us-west-2:197873462522:scarp-cpu'
+
+    for i in instances:
+        alarm = boto.ec2.cloudwatch.MetricAlarm(
+                name='low-cpu',
+                namespace='AWS/EC2',
+                metric='CPUUtilization',
+                statistic='Average',
+                period=60*5,
+                comparison='<=',
+                threshold=50,
+                evaluation_periods=2,
+                dimensions={'InstanceId' : [i.id]},
+                alarm_actions=[topic])
+        connection.put_metric_alarm(alarm)
+        time.sleep(1)
+
 def launch_reducer():
     
     connection = boto.ec2.connect_to_region('us-west-2')
     new_reservation = connection.run_instances(
                                     AWS_WORKER_AMI,
                                     key_name=AWS_KEY_NAME,
-                                    instance_type=AWS_INSTANCE_TYPE,
+                                    instance_type=AWS_REDUCER_INSTANCE_TYPE,
                                     security_group_ids=[AWS_SECURITY_GROUP])
     instance = new_reservation.instances[0]
     connection.create_tags([instance.id], 
@@ -68,9 +89,9 @@ def upload_and_run_script(script, instance):
     DEVNULL = open(os.devnull, 'w')
     for command in commands:
         start = timer()
-        subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)
+        subprocess.call(command)
         stop = timer()
-        print('Execute command: {:.2f} s'.format(stop - start))
+        #print('Execute command: {:.2f} s'.format(stop - start))
     DEVNULL.close()
 
 def get_worker_instances():
@@ -114,7 +135,10 @@ if __name__ == "__main__":
 
     start = timer()
     print("Launching {} nodes...".format(num_ages))
-    workers = launch_workers(num_ages)
+    workers = get_worker_instances()
+    #workers = launch_workers(num_ages)
+    print("Adding CPU usage alarms to instances...")
+    add_alarm_to_instances(workers)
     stop = timer()
     print("Spin up: {:.2f} s".format((stop - start) / num_ages)) 
 
