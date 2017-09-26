@@ -151,7 +151,7 @@ class Reducer(object):
                 os.chdir(directory)
                 if self.subgrid_processed[i] < self.num_files - 1:
                     self.reduce_current_directory(i)
-                elif self.subgrid_processed[i] == self.num_files - 1:
+                if self.subgrid_processed[i] == self.num_files - 1:
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
