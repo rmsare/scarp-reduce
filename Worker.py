@@ -127,7 +127,7 @@ class Reducer(object):
 
         if os.path.exists('/efs/masks/' + tile_name + '_mask.npy'):
             mask = np.load('/efs/masks/' + tile_name + '_mask.npy')
-            results[:, ~mask] = np.nan
+            results[:, mask] = np.nan
 
         return results
 
@@ -194,22 +194,6 @@ class Reducer(object):
         os.remove(tile + '_results.npy')
         os.remove(tile + '_results.tif')
         self.logger.info("Saved best results for {}".format(tile))
-
-    def save_results(self):
-        # Save all reduced results to S3 bucket
-
-        subgrids = os.listdir(self.path)
-        # XXX: Assumes each directory contains a single file containing fully reduced data!
-        for tile in subgrids:
-            best_file = self.path + '/' + tile + '/' + os.listdir(self.path + '/' + tile)[0]
-            results = np.load(best_file)    
-            results = self.mask_results(tile, results)
-            np.save(best_file, results)    
-            save_file_to_s3(best_file, tile + '_results.npy', bucket_name='scarp-testing')
-            save_tiff(results, tile)
-            best_tiff = '/efs/results/' + tile + '_results.tif' 
-            save_file_to_s3(best_tiff, tile + '_results.tif', bucket_name='scarp-testing')
-            self.logger.info("Saved best results for {}".format(tile))
 
     def set_num_files(self, num_files):
         # Number of files per directory (= number of workers/search steps)
