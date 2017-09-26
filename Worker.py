@@ -161,7 +161,7 @@ class Reducer(object):
 
         stop = timer()
         average_time = (stop - start) / num_subgrids
-        self.logger.info("Processed:\t {} files".format(files_processed + num_subgrids))
+        self.logger.info("Processed:\t {} files".format(self.files_processed + num_subgrids))
         self.logger.info("Average processing time: {:.2f} s per grid".format(average_time)) 
 
         os.chdir(curdir)
@@ -169,7 +169,7 @@ class Reducer(object):
     def reduce_current_directory(self, i):
         results = os.listdir('.')
         while len(results) > 1:
-            time.sleep(2)
+            sleep(2)
             results1 = results.pop()
             results2 = results.pop()
             try:

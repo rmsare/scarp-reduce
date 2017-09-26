@@ -76,11 +76,9 @@ def save_file_to_s3(infilename, outfilename, bucket_name):
 
 def save_tiff(array, tile, data_dir='/efs/data/', results_dir='/efs/results/'):
     filename = tile  + '_results.tif'
-    print(filename)
     nbands, nrows, ncols = array.shape
 
     data_file = data_dir + tile + '.tif'
-    print(data_file)
     inraster = gdal.Open(data_file)
     transform = inraster.GetGeoTransform()
     
