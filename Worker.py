@@ -122,15 +122,6 @@ class Reducer(object):
         #self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd().split('/')[-1])) 
         return data2
     
-    def mask_results(self, tile_name, results):
-        # Mask out nodata in results ndarray using saved mask
-
-        if os.path.exists('/efs/masks/' + tile_name + '_mask.npy'):
-            mask = np.load('/efs/masks/' + tile_name + '_mask.npy')
-            results[:, mask] = np.nan
-
-        return results
-
     def reduce_all_results(self):
         # Reduce results in all directories until all search steps have been compared
 
@@ -142,7 +133,7 @@ class Reducer(object):
 
         num_subgrids = len(subgrids)
         self.subgrid_processed = np.zeros(num_subgrids)
-        total_files = num_subgrids*(self.num_files - 1)
+        total_files = num_subgrids * (self.num_files - 1)
         self.logger.info("Expecting:\t {} files".format(total_files))
 
         self.files_processed = 0
@@ -187,12 +178,8 @@ class Reducer(object):
         tile = directory.strip('/')
         best_file = os.listdir('.')[0]
         results = np.load(best_file)    
-        results = self.mask_results(tile, results)
-        np.save(tile + '_results.npy', results)    
-        save_file_to_s3(tile + '_results.npy', tile + '_results.npy', bucket_name='scarp-testing')
         save_tiff(results, tile, results_dir='')
         save_file_to_s3(tile + '_results.tif', tile + '_results.tif', bucket_name='scarp-testing')
-        os.remove(tile + '_results.npy')
         os.remove(tile + '_results.tif')
         os.remove(best_file)
         self.logger.info("Saved best results for {}".format(tile))
