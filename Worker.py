@@ -57,6 +57,8 @@ class Matcher(object):
         self.dy = self.data._georef_info.dy
         self.pad_dx /= self.dx
         self.pad_dy /= self.dy
+        self.pad_dx = int(self.pad_dx)
+        self.pad_dy = int(self.pad_dy)
         self.data._pad_boundary(self.pad_dx, self.pad_dy) # TODO: Pad data once and save
         #self.logger.info("Loaded data from {}".format(self.source))
     
