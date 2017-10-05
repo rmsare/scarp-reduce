@@ -1,5 +1,5 @@
 import os, sys
-sys.path.append('/home/ubuntu/scarplet-python/scarplet')
+sys.path.append('/home/rmsare/src/scarplet-python/scarplet')
 
 import dem, scarplet
 import numpy as np
@@ -29,18 +29,18 @@ if __name__ == "__main__":
    #     num_ages = int((max_age - min_age) / d_age)
    #     ages = np.linspace(min_age, max_age, num_ages)
 
-    local_data_directory = '/efs/data/'
+    local_data_directory = 'data/'
     tiles = os.listdir(local_data_directory)
-    local_results_directory = '/efs/results/'
+    local_results_directory = 'results/'
     for tile in tiles:
         result_dir = local_results_directory + tile[:-4]
         if not os.path.exists(result_dir):
             os.mkdir(result_dir)
 
     for tile in tiles:
-        #logger.info("Starting Matcher for {}".format(tile))
+        logger.info("Starting Matcher for {}, {} {}".format(tile, d, ages[0]))
         worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
         worker.process(d, ages)
-        #logger.info("Finished processing {}".format(tile))
+        logger.info("Finished processing {}, {} {}".format(tile, d, ages[0]))
         
         
