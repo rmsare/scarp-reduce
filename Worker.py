@@ -35,7 +35,7 @@ class Worker(object):
 
 class Matcher(object):
     
-    def __init__(self, source, pad_dx, pad_dy, base_path='/efs/results/'):
+    def __init__(self, source, pad_dx, pad_dy, base_path='results/'):
         self.age = None
         self. d = None
         self.pad_dx = pad_dx
@@ -160,7 +160,6 @@ class Reducer(object):
     def reduce_current_directory(self, i):
         results = os.listdir('.')
         while len(results) > 1:
-            sleep(2)
             results1 = results.pop()
             results2 = results.pop()
             try:
