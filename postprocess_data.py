@@ -8,14 +8,15 @@ from osgeo import gdal, osr
 from s3utils import save_tiff
 
 if __name__ == "__main__":
-    files = os.listdir('masked/')
+    files = os.listdir('results/')
     files = [f for f in files if 'tif' in f]
     for f in files:
+        print("processing {}...".format(f))
         tile_name = f[0:10]
-        data = dem.DEMGrid('tif/' + tile_name + '.tif')
+        data = dem.DEMGrid('/media/rmsare/GALLIUMOS/data/ot_data/merged_2km/2m/' + tile_name + '.tif')
         mask = np.isnan(data._griddata)
         
-        inraster = gdal.Open('masked/' + f)
+        inraster = gdal.Open('results/' + f)
         transform = inraster.GetGeoTransform()
         nbands = inraster.RasterCount
         ncols = inraster.RasterXSize
@@ -29,7 +30,7 @@ if __name__ == "__main__":
         array[:, mask] = np.nan
         
         for i in range(nbands):
-            out_band = inraster.GetRasterBand(i+1)
+            out_band = outraster.GetRasterBand(i+1)
             out_band.WriteArray(array[i])
             out_band.FlushCache()
         
