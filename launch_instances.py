@@ -13,6 +13,9 @@ from settings import AWS_WORKER_AMI, AWS_BUCKET_NAME, AWS_REDUCER_INSTANCE_TYPE,
 MAX_RETRIES = 100
 
 def launch_workers(num_workers):
+
+    if num_workers == 0:
+        return []
     
     connection = boto.ec2.connect_to_region('us-west-2')
     new_reservation = connection.run_instances(
@@ -81,6 +84,8 @@ def upload_and_run_script(script, instance):
         f.write(script)
 
     commands = []
+    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo killall ipython'])
+    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo sysctl -w vm.drop_caches=3'])
     commands.append(['scp', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'setup_and_run.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
     commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo /etc/init.d/screen-cleanup start'])
     commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x setup_and_run.sh'])
@@ -89,7 +94,7 @@ def upload_and_run_script(script, instance):
     DEVNULL = open(os.devnull, 'w')
     for command in commands:
         start = timer()
-        subprocess.call(command)
+        subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)
         stop = timer()
         #print('Execute command: {:.2f} s'.format(stop - start))
     DEVNULL.close()
@@ -98,17 +103,27 @@ def get_worker_instances():
 
     connection = boto.ec2.connect_to_region('us-west-2')
     reservations = connection.get_all_instances(filters={'tag:Name' : 'Worker', 'instance-state-name' : 'running'})
-    return reservations[0].instances
+
+    if len(reservations) == 0:
+        return []
+    else:
+        instance_list = [x.instances for x in reservations]
+        workers = set().union(*instance_list)
+        return workers 
 
 def run_job(instance, param):
+
     script = STARTUP_SCRIPT.format(param[0], param[1])
     upload_and_run_script(script, instance)
     instance.update()
+
+    connection = boto.ec2.connect_to_region('us-west-2')
+    connection.create_tags([instance.id], {"Param" : "{}".format(param)})
     print("START: {} Started processing {:d} {:.2f}".format(instance.public_dns_name, param[0], param[1]))
 
 def relaunch_jobs():
 
-    d = 100 
+    d = int(sys.argv[1]) 
     min_age = 0
     max_age = 3.5 
     d_age = 0.1
@@ -125,22 +140,28 @@ def relaunch_jobs():
 
 if __name__ == "__main__":
 
-    d = 100 
+    d =int(sys.argv[1]) 
     min_age = 0
     max_age = 3.5 
     d_age = 0.1
     #num_ages = int((max_age - min_age) / d_age)
-    num_ages = int(sys.argv[1])
-    ages = np.linspace(min_age, max_age, num_ages) 
+    num_workers = int(sys.argv[2])
+    ages = np.linspace(min_age, max_age, num_workers) 
 
     start = timer()
-    print("Launching {} nodes...".format(num_ages))
-    workers = get_worker_instances()
-    #workers = launch_workers(num_ages)
+    
+    old_workers = get_worker_instances()
+    num_workers -= len(old_workers)
+    print("Using {} active nodes...".format(len(old_workers)))
+    print("Starting {} new nodes...".format(num_workers))
+
+    workers = launch_workers(num_workers)
+    workers.extend(old_workers)
+
     print("Adding CPU usage alarms to instances...")
     add_alarm_to_instances(workers)
     stop = timer()
-    print("Spin up: {:.2f} s".format((stop - start) / num_ages)) 
+    #print("Spin up: {:.2f} s".format((stop - start) / num_ages)) 
 
     start = timer()
     for age, instance in zip(ages, workers):
