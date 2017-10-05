@@ -35,7 +35,7 @@ class Worker(object):
 
 class Matcher(object):
     
-    def __init__(self, source, pad_dx, pad_dy, base_path='results/'):
+    def __init__(self, source, pad_dx, pad_dy, base_path='/efs/results/'):
         self.age = None
         self. d = None
         self.pad_dx = pad_dx
