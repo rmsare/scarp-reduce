@@ -3,12 +3,12 @@ AWS_WORKER_INSTANCE_TYPE = 'c4.xlarge'
 AWS_REDUCER_INSTANCE_TYPE = 't2.medium'
 AWS_KEY_NAME = 'aws-scarp'
 AWS_SECURITY_GROUP = 'sg-2b925f50'
-AWS_WORKER_AMI = 'ami-5c708e24'
+AWS_WORKER_AMI = 'ami-fee32686'
 
 SSH_LOCAL_KEY = '/home/rmsare/aws_keys/aws-scarp.pem'
 
 REDUCER_SCRIPT = """#!/bin/bash
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-a91eb300.efs.us-west-2.amazonaws.com:/ /efs 
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-c14ae668.efs.us-west-2.amazonaws.com:/ /efs 
 sudo chown -R ubuntu /efs
 #cd /home/ubuntu/scarplet-python
 #git pull origin master
@@ -18,13 +18,14 @@ ipython reduce.py {}
 #sudo shutdown -h now"""
 
 STARTUP_SCRIPT = """#!/bin/bash
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-a91eb300.efs.us-west-2.amazonaws.com:/ /efs 
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-c14ae668.efs.us-west-2.amazonaws.com:/ /efs 
 sudo chown -R ubuntu /efs
 #cd /home/ubuntu/scarplet-python
 #git pull origin master
 cd /home/ubuntu/scarp-reduce
+#git stash
 #git pull origin master
-ipython match.py {} {} 200 200
-sudo shutdown -h now"""
+ipython match.py {} {} 1000 1000
+#sudo shutdown -h now"""
 
 
