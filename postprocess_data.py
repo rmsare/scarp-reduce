@@ -19,7 +19,7 @@ if __name__ == "__main__":
         data = dem.DEMGrid(data_dir + tile_name + '.tif')
         mask = np.isnan(data._griddata)
         
-        inraster = gdal.Open('results/' + f)
+        inraster = gdal.Open(results_dir + f)
         transform = inraster.GetGeoTransform()
         nbands = inraster.RasterCount
         ncols = inraster.RasterXSize
