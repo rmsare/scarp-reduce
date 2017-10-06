@@ -8,12 +8,15 @@ from osgeo import gdal, osr
 from s3utils import save_tiff
 
 if __name__ == "__main__":
-    files = os.listdir('results/')
+    results_dir = '/home/rmsare/r/scarplet/raw/'
+    working_dir = '/home/rmsare/r/scarplet/masked/'
+    files = os.listdir(results_dir)
     files = [f for f in files if 'tif' in f]
     for f in files:
         print("processing {}...".format(f))
         tile_name = f[0:10]
-        data = dem.DEMGrid('/media/rmsare/GALLIUMOS/data/ot_data/merged_2km/2m/' + tile_name + '.tif')
+        data_dir =  '/media/rmsare/GALLIUMOS/data/ot_data/merged_2km/2m/'
+        data = dem.DEMGrid(data_dir + tile_name + '.tif')
         mask = np.isnan(data._griddata)
         
         inraster = gdal.Open('results/' + f)
@@ -23,7 +26,7 @@ if __name__ == "__main__":
         nrows = inraster.RasterYSize
         
         driver = gdal.GetDriverByName('GTiff')
-        outraster = driver.Create('masked/' + f, ncols, nrows, nbands, gdal.GDT_Float32)
+        outraster = driver.Create(working_dir + f, ncols, nrows, nbands, gdal.GDT_Float32)
         outraster.SetGeoTransform(transform)
 
         array = inraster.ReadAsArray()
