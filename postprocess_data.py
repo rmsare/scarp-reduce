@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for f in files:
         print("processing {}...".format(f))
         tile_name = f[0:10]
-        data_dir =  '/media/rmsare/GALLIUMOS/data/ot_data/merged_2km/2m/'
+        data_dir =  '/media/rmsare/GALLIUMOS/data/ot_data/tif/2m/'
         data = dem.DEMGrid(data_dir + tile_name + '.tif')
         mask = np.isnan(data._griddata)
         

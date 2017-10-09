@@ -11,45 +11,17 @@ FLOAT32_MIN = np.finfo(np.float32).min
 
 if __name__ == "__main__":
 
-    #maxs = []
-    #mins = []
-
-    #for filename in os.listdir(results_dir):
-    #    tile_name = filename[0:10]
-    #    
-    #    dem = gdal.Open('tif/' + tile_name + '.tif')
-    #    elev = dem.ReadAsArray()
-    #    nodata = np.logical_or(elev == FLOAT32_MIN, np.isnan(elev))
-
-    #    raster = gdal.Open(results_dir + filename)
-    #    data = raster.ReadAsArray()
-    #    data[:, nodata] = np.nan
-    #    mask = data[1] < 10
-    #    data[:, mask] = np.nan
-
-    #    maxs.append(np.nanmax(data[3]))
-    #    mins.append(np.nanmin(data[3]))
-    #
-    #snr_max = np.array(maxs).max()
-    #snr_min = np.array(mins).min()
-    #print("SNR MAX: {:.2f} MIN: {:.2f}".format(snr_max, snr_min))
-
     results_dir = '/home/rmsare/r/scarplet/raw/'
     working_dir = '/home/rmsare/r/scarplet/masked/'
-    remote_dir = '/media/rmsare/GALLIUMOS/data/ot_data/merged_2km/2m/'
+    remote_dir = '/media/rmsare/GALLIUMOS/data/ot_data/tif/2m/'
     files = os.listdir(results_dir)
     #files.remove('masked')
     for filename in files:
         tile_name = filename[0:10]
         print("processing {}".format(tile_name))
         
-        dem = gdal.Open(remote_dir + tile_name + '.tif')
-        elev = dem.ReadAsArray()
-        nodata = np.logical_or(elev == FLOAT32_MIN, np.isnan(elev))
-
         raster = gdal.Open(results_dir + filename)
         data = raster.ReadAsArray()
-        data[:, nodata] = np.nan
 
         mask = data[1] < 10
         data[:, mask] = np.nan
