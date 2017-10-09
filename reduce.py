@@ -22,9 +22,3 @@ if __name__ == "__main__":
 
     # Reduce results as they arrive
     reducer.reduce_all_results()
-
-    # Convert best results to TIFF
-
-    # Save best results to S3
-    logger.info("Saving best reduced results")
-    reducer.save_results()
