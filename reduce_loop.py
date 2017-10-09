@@ -2,7 +2,7 @@ import os, sys
 import logging
 
 from launch_instances import launch_jobs
-from s3utils import download_data
+from s3utils import download_data, save_file_to_s3
 from shutil import rmtree
 from time import sleep
 
@@ -24,11 +24,10 @@ def reduce_current_data(num_files=35):
     # Reduce results as they arrive
     reducer.reduce_all_results()
 
-#def upload_log():
-#    fn = 'scarplet-' + datetime.now().isoformat() + '.log' 
-#    ...
-#    os.remove('/efs/logs/scarp_reduce.log')
-#    pass
+def upload_log():
+    outfilename = 'scarplet-' + datetime.now().isoformat() + '.log' 
+    save_file_to_s3('/efs/logs/scarp_reduce.log', outfilename, bucket='scarp-log')
+    os.remove('/efs/logs/scarp_reduce.log')
 
 if __name__ == "__main__":
     d = int(sys.argv[1])
@@ -53,7 +52,7 @@ if __name__ == "__main__":
         logger.info("Deleting data and working files")
         delete_local_files()
         logger.info("Uploading log")
-        #upload_log()
+        upload_log()
         finished_processing = last_key is None
 
         
