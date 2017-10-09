@@ -37,10 +37,12 @@ if __name__ == "__main__":
         if not os.path.exists(result_dir):
             os.mkdir(result_dir)
 
+    logger.info("Starting Matcher for {} {:.2f}".format(d, ages[0]))
+
     for tile in tiles:
-        logger.info("Starting Matcher for {}, {} {}".format(tile, d, ages[0]))
+        logger.debug("Starting Matcher for {}, {} {:.2f}".format(tile, d, ages[0]))
         worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
         worker.process(d, ages)
-        logger.info("Finished processing {}, {} {}".format(tile, d, ages[0]))
+        logger.debug("Finished processing {}, {} {:.2f}".format(tile, d, ages[0]))
         
         
