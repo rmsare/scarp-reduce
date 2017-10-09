@@ -128,16 +128,16 @@ def launch_jobs(d, num_workers):
     ages = np.linspace(min_age, max_age, num_workers) 
 
     old_workers = get_worker_instances()
-    if len(old_workers) > 0:
+    if len(old_workers) > 0 and len(old_workers) < num_workers:
         workers = launch_workers(num_workers - len(old_workers))
+        workers.extend(old_workers)
+    else:
+        workers = old_workers
         
     add_alarm_to_instances(workers)
-    workers.extend(old_workers)
     
-    start = timer()
     for age, instance in zip(ages, workers):
         run_job(instance, [d, age])
-    stop = timer()
 
 def terminate_instances(name="Worker"):
 
