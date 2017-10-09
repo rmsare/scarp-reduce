@@ -40,12 +40,13 @@ if __name__ == "__main__":
     logger = logging.getLogger('scarp_reduce')
 
     last_key = ''
-    while last_key:
+    finished_processing = last_key is None
+    while not finished_processing:
         logger.info("Downloading batch beginning with " + last_key)
-        download_data(remote_dir, marker=last_key, batch_size=batch_size)
+        last_key = download_data(remote_dir, last_key=last_key, batch_size=batch_size)
         logger.info("Launching matching jobs")
         launch_jobs(d, num_workers)
-        while len(os.listdir('/efs/results')) != 0:
+        while len(os.listdir('/efs/results')) == 0:
             sleep(5)
         logger.info("Reducing current results")
         reduce_current_data(num_workers)
@@ -53,6 +54,7 @@ if __name__ == "__main__":
         delete_local_files()
         logger.info("Uploading log")
         #upload_log()
+        finished_processing = last_key is None
 
         
 
