@@ -36,14 +36,12 @@ def download_data(remote_dir, last_key='', batch_size=100):
     connection = boto.connect_s3()
     bucket = connection,get_bucket('scarp-data')
 
-    keys = bucket.get_all_keys(marker=remote_dir + last_key, prefix=remote_dir + 'fg')
+    keys = bucket.get_all_keys(marker=remote_dir + last_key,
+                               prefix=remote_dir + 'fg',
+                               max_keys=batch_size)
     for k in keys:
         fn = k.name.split('/')[-1]
-        grids = [f for f in neighbors(fn) if not os.path.exists(f)]
-        for f in grids:
-            key = bucket.get_key(remote_dir + f)
-            fn = key.name.split('/')[-1]
-            key.get_contents_to_filename(fn)
+        k.get_contents_to_filename(fn)
         last_key = k.name
 
     os.chdir(curdir)
