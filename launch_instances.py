@@ -121,22 +121,23 @@ def run_job(instance, param):
     connection.create_tags([instance.id], {"Param" : "{}".format(param)})
     print("START: {} Started processing {:d} {:.2f}".format(instance.public_dns_name, param[0], param[1]))
 
-def launch_jobs():
+def launch_jobs(d, num_ages):
 
-    d = int(sys.argv[1]) 
     min_age = 0
     max_age = 3.5 
-    d_age = 0.1
-    num_ages = int((max_age - min_age) / d_age)
     ages = np.linspace(min_age, max_age, num_ages) 
 
-    workers = get_worker_instances()
+    old_workers = get_worker_instances()
+    num_workers -= len(old_workers)
+
+    workers = launch_workers(num_workers)
+    add_alarm_to_instances(workers)
+    workers.extend(old_workers)
     
     start = timer()
     for age, instance in zip(ages, workers):
         run_job(instance, [d, age])
     stop = timer()
-    #print("Re-launched jobs: {:.2f} s".format(stop - start))
 
 def terminate_instances(name="Worker"):
 
