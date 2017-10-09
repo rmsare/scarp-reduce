@@ -84,12 +84,12 @@ def upload_and_run_script(script, instance):
         f.write(script)
 
     commands = []
-    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo killall ipython'])
-    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo sysctl -w vm.drop_caches=3'])
-    commands.append(['scp', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'setup_and_run.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
-    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo /etc/init.d/screen-cleanup start'])
-    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x setup_and_run.sh'])
-    commands.append(['ssh', '-o IdentityFile=/home/rmsare/aws_keys/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ./setup_and_run.sh'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo killall ipython'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo sysctl -w vm.drop_caches=3'])
+    commands.append(['scp', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'setup_and_run.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo /etc/init.d/screen-cleanup start'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x setup_and_run.sh'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ./setup_and_run.sh'])
     
     DEVNULL = open(os.devnull, 'w')
     for command in commands:
@@ -121,16 +121,16 @@ def run_job(instance, param):
     connection.create_tags([instance.id], {"Param" : "{}".format(param)})
     print("START: {} Started processing {:d} {:.2f}".format(instance.public_dns_name, param[0], param[1]))
 
-def launch_jobs(d, num_ages):
+def launch_jobs(d, num_workers):
 
     min_age = 0
     max_age = 3.5 
-    ages = np.linspace(min_age, max_age, num_ages) 
+    ages = np.linspace(min_age, max_age, num_workers) 
 
     old_workers = get_worker_instances()
-    num_workers -= len(old_workers)
-
-    workers = launch_workers(num_workers)
+    if len(old_workers) > 0:
+        workers = launch_workers(num_workers - len(old_workers))
+        
     add_alarm_to_instances(workers)
     workers.extend(old_workers)
     
