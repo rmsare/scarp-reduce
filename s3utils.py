@@ -3,9 +3,10 @@ Utilities for S3 data transfer
 """
 
 import boto
-from datetime import datetime, timedelta
 import numpy as np
 from osgeo import gdal, osr
+from datetime import datetime, timedelta
+from merge_grids import neighbors
 
 def delete_file_from_s3(filename, bucket_name):
     connection = boto.connect_s3()
@@ -27,6 +28,31 @@ def delete_old_keys_from_s3(max_age, bucket_name, subdirectory='', bad_substring
         if in_subdirectory and older_than_max_age and bad_substring in key.name:
             key.delete()
 
+def download_data(remote_dir, last_key='', batch_size=100):
+    dest_dir = '/efs/data/'
+    curdir = os.getcwd()
+    os.chdir(dest_dir)
+
+    connection = boto.connect_s3()
+    bucket = connection,get_bucket('scarp-data')
+
+    keys = bucket.get_all_keys(marker=remote_dir + last_key, prefix=remote_dir + 'fg')
+    for k in keys:
+        fn = k.name.split('/')[-1]
+        grids = [f for f in neighbors(fn) if not os.path.exists(f)]
+        for f in grids:
+            key = bucket.get_key(remote_dir + f)
+            fn = key.name.split('/')[-1]
+            key.get_contents_to_filename(fn)
+        last_key = k.name
+
+    os.chdir(curdir)
+    
+    if not keys.is_truncated:
+        last_key = None 
+
+    return last_key
+
 def list_dir_s3(directory, bucket_name):
     connection = boto.connect_s3()
     bucket = connection.get_bucket(bucket_name, validate=False)
@@ -35,20 +61,6 @@ def list_dir_s3(directory, bucket_name):
     filenames = [fn.replace(directory, '') for fn in filenames]
     #filenames.remove('')
     return filenames
-
-def make_dir_for_user_request(datetime_min, datetime_max, bucket_name, base_dir='requested/', station_name='HSL'):
-    connection = boto.connect_s3()
-    bucket = connection.get_bucket(bucket_name, validate=False)
-    dir_name = base_dir +  station_name + "_EC_" + '_'.join(datetime_min.isoformat().split(' ') + datetime_max.isoformat().split(' ')) + "/"
-    key = bucket.new_key(dir_name)
-    key.set_contents_from_string('')
-    subfolders = ['fig/', 'filtered/']
-    for folder in subfolders:
-        path = dir_name + folder
-        key = bucket.new_key(path)
-        key.set_contents_from_string('')
-        key.set_canned_acl('public-read')
-    return dir_name
 
 def download_data_from_s3(infilename, outfilename, bucket_name):
     connection = boto.connect_s3()
