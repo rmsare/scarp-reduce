@@ -61,7 +61,7 @@ class Matcher(object):
         self.pad_dx = int(self.pad_dx)
         self.pad_dy = int(self.pad_dy)
         #self.data._pad_boundary_with_neighboring_values(self.pad_dx)
-        #self.logger.info("Loaded data from {}".format(self.source))
+        self.logger.debug("Loaded data from {}".format(self.source))
     
     def match_template(self):
         # Match template to data
@@ -73,15 +73,15 @@ class Matcher(object):
 
         start = timer()
         self.load_data()
-        self.d = d
         
         for age in ages:
             self.set_params(age, d)
             self.save_template_match()
         stop = timer()
-        #self.logger.info("Processed:\t {}".format(self.source))
-        #self.logger.info("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
-        #self.logger.info("Elapsed time:\t {:.2f} s".format(stop - start))
+
+        self.logger.debug("Processed:\t {}".format(self.source))
+        self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
+        self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         # Match template, and save clipped (valid) results
@@ -124,7 +124,7 @@ class Reducer(object):
         
         os.remove(file1)
         os.remove(file2)
-        #self.logger.info("Compared {} and {} in {}".format(file1, file2, os.getcwd().split('/')[-1])) 
+        self.logger.debug("Compared {} and {} in {}".format(file1, file2, os.getcwd().split('/')[-1])) 
         return data2
     
     def reduce_all_results(self):
@@ -139,7 +139,8 @@ class Reducer(object):
         num_subgrids = len(subgrids)
         self.subgrid_processed = np.zeros(num_subgrids)
         total_files = num_subgrids * (self.num_files - 1)
-        self.logger.info("Expecting:\t {} files".format(total_files))
+        self.logger.debug("Reducing {} grids".format(num_subgrids))
+        self.logger.debug("Expecting {} files total".format(total_files))
 
         self.files_processed = 0
         while self.files_processed < total_files:
@@ -174,8 +175,8 @@ class Reducer(object):
                 self.files_processed += 1
                 self.subgrid_processed[i] += 1
             except (IOError, ValueError) as e:
-                self.logger.info("Error: " + str(e))
-                self.logger.info("Tried to read incomplete npy file")
+                self.logger.debug("Error: " + str(e))
+                self.logger.debug("Tried to read incomplete npy file")
             results = os.listdir('.')
 
     def save_best_result(self, directory):
@@ -186,7 +187,7 @@ class Reducer(object):
         save_file_to_s3(tile + '_results.tif', tile + '_results.tif', bucket_name='scarp-testing')
         os.remove(tile + '_results.tif')
         os.remove(best_file)
-        self.logger.info("Saved best results for {}".format(tile))
+        self.logger.debug("Saved best results for {}".format(tile))
 
     def set_num_files(self, num_files):
         # Number of files per directory (= number of workers/search steps)
