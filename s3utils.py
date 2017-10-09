@@ -2,6 +2,7 @@
 Utilities for S3 data transfer
 """
 
+import os
 import boto
 import numpy as np
 from osgeo import gdal, osr
@@ -34,7 +35,7 @@ def download_data(remote_dir, last_key='', batch_size=100):
     os.chdir(dest_dir)
 
     connection = boto.connect_s3()
-    bucket = connection,get_bucket('scarp-data')
+    bucket = connection.get_bucket('scarp-data')
 
     keys = bucket.get_all_keys(marker=remote_dir + last_key,
                                prefix=remote_dir + 'fg',
