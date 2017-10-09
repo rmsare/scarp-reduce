@@ -3,7 +3,7 @@ AWS_WORKER_INSTANCE_TYPE = 'c4.xlarge'
 AWS_REDUCER_INSTANCE_TYPE = 't2.medium'
 AWS_KEY_NAME = 'aws-scarp'
 AWS_SECURITY_GROUP = 'sg-2b925f50'
-AWS_WORKER_AMI = 'ami-9ac601e2'
+AWS_WORKER_AMI = 'ami-24cf085c'
 
 SSH_LOCAL_KEY = '/home/ubuntu/aws-scarp.pem'
 
