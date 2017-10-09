@@ -26,7 +26,7 @@ def reduce_current_data(num_files=35):
 
 def upload_log():
     outfilename = 'scarplet-' + datetime.now().isoformat() + '.log' 
-    save_file_to_s3('/efs/logs/scarp_reduce.log', outfilename, bucket='scarp-log')
+    save_file_to_s3('/efs/logs/scarp_reduce.log', outfilename, bucket_name='scarp-log')
     os.remove('/efs/logs/scarp_reduce.log')
 
 if __name__ == "__main__":
