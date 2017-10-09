@@ -128,7 +128,7 @@ def launch_jobs(d, num_workers):
     ages = np.linspace(min_age, max_age, num_workers) 
 
     old_workers = get_worker_instances()
-    if len(old_workers) > 0 and len(old_workers) < num_workers:
+    if len(old_workers) < num_workers:
         workers = launch_workers(num_workers - len(old_workers))
         workers.extend(old_workers)
     else:
