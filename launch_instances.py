@@ -121,7 +121,7 @@ def run_job(instance, param):
     connection.create_tags([instance.id], {"Param" : "{}".format(param)})
     print("START: {} Started processing {:d} {:.2f}".format(instance.public_dns_name, param[0], param[1]))
 
-def relaunch_jobs():
+def launch_jobs():
 
     d = int(sys.argv[1]) 
     min_age = 0
@@ -136,7 +136,16 @@ def relaunch_jobs():
     for age, instance in zip(ages, workers):
         run_job(instance, [d, age])
     stop = timer()
-    print("Re-launched jobs: {:.2f} s".format(stop - start))
+    #print("Re-launched jobs: {:.2f} s".format(stop - start))
+
+def terminate_instances(name="Worker"):
+
+    connection = boto.ec2.connect_to_region('us-west-2')
+    reservations = connection.get_all_instances(filters={'tag:Name' : name, 'instance-state-name' : 'running'})
+
+    for r in reservations:
+        ids = [i.id for i in r.instances]
+        connection.terminate_instances(ids=ids)
 
 if __name__ == "__main__":
 
@@ -156,10 +165,11 @@ if __name__ == "__main__":
     print("Starting {} new nodes...".format(num_workers))
 
     workers = launch_workers(num_workers)
-    workers.extend(old_workers)
-
     print("Adding CPU usage alarms to instances...")
     add_alarm_to_instances(workers)
+    workers.extend(old_workers)
+
+
     stop = timer()
     #print("Spin up: {:.2f} s".format((stop - start) / num_ages)) 
 
