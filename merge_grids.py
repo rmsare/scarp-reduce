@@ -4,7 +4,7 @@ import numpy as np
 from osgeo import gdal
 from itertools import product
 
-sys.path.append('/home/rmsare/src/scarplet-python/scarplet')
+sys.path.append('/home/ubuntu/scarplet-python/scarplet')
 import dem
 
 def neighbors(filename, offset=2):

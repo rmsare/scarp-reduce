@@ -43,7 +43,7 @@ def download_data(remote_dir, last_key='', batch_size=100):
     for k in keys:
         fn = k.name.split('/')[-1]
         k.get_contents_to_filename(fn)
-        last_key = k.name
+        last_key = fn
 
     os.chdir(curdir)
     
