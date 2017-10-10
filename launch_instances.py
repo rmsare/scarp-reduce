@@ -88,6 +88,7 @@ def upload_and_run_script(script, instance):
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo sysctl -w vm.drop_caches=3'])
     commands.append(['scp', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'runme.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo /etc/init.d/screen-cleanup start'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ipython /home/ubuntu/scarp-reduce/monitor.py'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x runme.sh'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ./runme.sh'])
     
