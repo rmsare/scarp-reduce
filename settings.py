@@ -8,23 +8,26 @@ AWS_WORKER_AMI = 'ami-d8f136a0'
 SSH_LOCAL_KEY = '/home/ubuntu/aws-scarp.pem'
 
 REDUCER_SCRIPT = """#!/bin/bash
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-014be5a8.efs.us-west-2.amazonaws.com:/ /efs 
-sudo chown -R ubuntu /efs
 cd /home/ubuntu/scarp-reduce
 #git pull origin master
 ipython reduce_loop.py {} {} {} {}
 #sudo shutdown -h now"""
 
 WORKER_SCRIPT = """#!/bin/bash
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-014be5a8.efs.us-west-2.amazonaws.com:/ /efs 
-sudo chown -R ubuntu /efs
 cd /home/ubuntu/scarp-reduce
-#git stash
-#git pull origin master
 screen -d -m ipython monitor.py 
 ipython match.py {} {} 200 200
 #sudo shutdown -h now"""
 
 STARTUP_SCRIPT = """#!/bin/bash
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-014be5a8.efs.us-west-2.amazonaws.com:/ /efs 
-sudo chown -R ubuntu /efs"""
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-c2e54c6b.efs.us-west-2.amazonaws.com:/ /efs 
+sudo chown -R ubuntu /efs
+mkdir /efs/data /efs/results /efs/logs
+cd /home/ubuntu/scarp-reduce
+git stash
+git pull origin master
+sudo killall ipython screen"""
+
+TEARDOWN_SCRIPT = """#!/bin/bash
+sudo umount /efs
+sudo killall ipython screen"""
