@@ -142,7 +142,7 @@ class Reducer(object):
 
         self.files_processed = 0
         while self.files_processed < total_files:
-            for i, directory in enumerate(subgrids):
+            for directory in os.listdir(self.path):
                 os.chdir(directory)
                 if len(os.listdir('.')) == self.num_files:
                     self.reduce_current_directory()
