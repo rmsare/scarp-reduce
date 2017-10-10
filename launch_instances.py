@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 
 from boto.manage.cmdshell import sshclient_from_instance
 
-from settings import AWS_WORKER_AMI, AWS_BUCKET_NAME, AWS_REDUCER_INSTANCE_TYPE, AWS_WORKER_INSTANCE_TYPE, AWS_KEY_NAME, AWS_SECURITY_GROUP, REDUCER_SCRIPT, STARTUP_SCRIPT, SSH_LOCAL_KEY
+from settings import AWS_WORKER_AMI, AWS_BUCKET_NAME, AWS_REDUCER_INSTANCE_TYPE, AWS_WORKER_INSTANCE_TYPE, AWS_KEY_NAME, AWS_SECURITY_GROUP, REDUCER_SCRIPT, STARTUP_SCRIPT, WORKER_SCRIPT, SSH_LOCAL_KEY
 
 MAX_RETRIES = 100
 
@@ -29,12 +29,13 @@ def launch_workers(num_workers):
     for instance in new_reservation.instances:
         connection.create_tags([instance.id], 
                                 {"Name" : "Worker"})
-    
-    #print("Launched worker: d = {:.2f}, age = {:.2f}".format(param[0], param[1]))
-    #print("Public DNS: {}".format(dns))
-    #print("State: {}".format(instance.state))
-    #print("Launched worker: {}".format(instance.public_dns_name))
 
+    for instance in new_reservation.instances:
+        while instance.state == u'pending':
+            time.sleep(2)
+            instance.update()
+        upload_and_run_script(STARTUP_SCRIPT, instance)
+    
     return new_reservation.instances
 
 def add_alarm_to_instances(instances):
@@ -80,16 +81,16 @@ def upload_and_run_script(script, instance):
     instance.update()
     dns = instance.public_dns_name
 
-    with open('setup_and_run.sh', 'w') as f:
+    with open('runme.sh', 'w') as f:
         f.write(script)
 
     commands = []
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo killall ipython'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo sysctl -w vm.drop_caches=3'])
-    commands.append(['scp', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'setup_and_run.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
+    commands.append(['scp', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'runme.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo /etc/init.d/screen-cleanup start'])
-    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x setup_and_run.sh'])
-    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ./setup_and_run.sh'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x runme.sh'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ./runme.sh'])
     
     DEVNULL = open(os.devnull, 'w')
     for command in commands:
@@ -113,7 +114,7 @@ def get_worker_instances():
 
 def run_job(instance, param):
 
-    script = STARTUP_SCRIPT.format(param[0], param[1])
+    script = WORKER_SCRIPT.format(param[0], param[1])
     upload_and_run_script(script, instance)
     instance.update()
 

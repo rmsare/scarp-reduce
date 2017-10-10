@@ -17,7 +17,7 @@ cd /home/ubuntu/scarp-reduce
 ipython reduce.py {}
 #sudo shutdown -h now"""
 
-STARTUP_SCRIPT = """#!/bin/bash
+WORKER_SCRIPT = """#!/bin/bash
 sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-014be5a8.efs.us-west-2.amazonaws.com:/ /efs 
 sudo chown -R ubuntu /efs
 #cd /home/ubuntu/scarplet-python
@@ -28,4 +28,6 @@ cd /home/ubuntu/scarp-reduce
 ipython match.py {} {} 200 200
 #sudo shutdown -h now"""
 
-
+STARTUP_SCRIPT = """#!/bin/bash
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-014be5a8.efs.us-west-2.amazonaws.com:/ /efs 
+sudo chown -R ubuntu /efs"""
