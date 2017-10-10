@@ -81,9 +81,6 @@ class Matcher(object):
                 self.logger.debug("Processed:\t {}".format(self.source))
                 self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
                 self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
-        
-        if len(os.listdir(self.path)) == 35:
-            os.remove('/efs/data/' + self.source)
 
     def save_template_match(self):
         # Match template, and save clipped (valid) results
@@ -199,5 +196,4 @@ class Reducer(object):
     def set_path(self, path):
 
         self.path = path
-                
 
