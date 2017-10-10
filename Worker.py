@@ -13,6 +13,7 @@ from osgeo import gdal, osr
 
 from s3utils import save_file_to_s3, save_tiff
 
+from shutil import rmtree
 from time import sleep
 from timeit import default_timer as timer
 
@@ -44,8 +45,6 @@ class Matcher(object):
 
         name = source.split('/')[-1][:-4]
         self.path = base_path + name + '/'
-        if not os.path.exists(self.path):
-            os.mkdir(self.path)
 
         self.source = source    
 
@@ -76,7 +75,7 @@ class Matcher(object):
         
         for age in ages:
             self.set_params(age, d)
-            if not os.path.exists(self.path + self.filename):
+            if not os.path.exists(self.path + self.filename) and os.path.exists(self.path):
                 self.save_template_match()
                 stop = timer()
                 self.logger.debug("Processed:\t {}".format(self.source))
@@ -137,7 +136,6 @@ class Reducer(object):
         start = timer()
 
         num_subgrids = len(subgrids)
-        self.subgrid_processed = np.zeros(num_subgrids)
         total_files = num_subgrids * (self.num_files - 1)
         self.logger.debug("Reducing {} grids".format(num_subgrids))
         self.logger.debug("Expecting {} files total".format(total_files))
@@ -146,15 +144,16 @@ class Reducer(object):
         while self.files_processed < total_files:
             for i, directory in enumerate(subgrids):
                 os.chdir(directory)
-                if self.subgrid_processed[i] < self.num_files - 1:
-                    self.reduce_current_directory(i)
-                if self.subgrid_processed[i] == self.num_files - 1:
+                if len(os.listdir('.')) == self.num_files:
+                    self.reduce_current_directory()
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
-                    self.subgrid_processed[i] += 1
-                os.chdir('..')
+                    os.chdir('..')
+                    rmtree(directory)
+                else:
+                    os.chdir('..')
 
         stop = timer()
         average_time = (stop - start) / num_subgrids
@@ -163,7 +162,7 @@ class Reducer(object):
 
         os.chdir(curdir)
                 
-    def reduce_current_directory(self, i):
+    def reduce_current_directory(self):
         results = os.listdir('.')
         while len(results) > 1:
             results1 = results.pop()
@@ -173,7 +172,6 @@ class Reducer(object):
                 filename = uuid.uuid4().hex + '.npy'
                 np.save(filename, best)
                 self.files_processed += 1
-                self.subgrid_processed[i] += 1
             except (IOError, ValueError) as e:
                 self.logger.debug("Error: " + str(e))
                 self.logger.debug("Tried to read incomplete npy file")
