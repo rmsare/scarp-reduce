@@ -76,12 +76,12 @@ class Matcher(object):
         
         for age in ages:
             self.set_params(age, d)
-            self.save_template_match()
-        stop = timer()
-
-        self.logger.debug("Processed:\t {}".format(self.source))
-        self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
-        self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
+            if not os.path.exists(self.path + self.filename):
+                self.save_template_match()
+                stop = timer()
+                self.logger.debug("Processed:\t {}".format(self.source))
+                self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
+                self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         # Match template, and save clipped (valid) results
