@@ -145,12 +145,12 @@ class Reducer(object):
             for directory in os.listdir(self.path):
                 os.chdir(directory)
                 if len(os.listdir('.')) == self.num_files:
-                    os.remove('/efs/data/' + directory + '.tif')
                     self.reduce_current_directory()
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
+                    os.remove('/efs/data/' + directory + '.tif')
                     os.chdir('..')
                     rmtree(directory)
                 else:
