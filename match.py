@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     logger.info("Starting Matcher for {} {:.2f}".format(d, ages[0]))
 
-    for tile in tiles:
+    for tile in os.listdir(local_data_directory):
         logger.debug("Starting Matcher for {}, {} {:.2f}".format(tile, d, ages[0]))
         worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
         worker.process(d, ages)
