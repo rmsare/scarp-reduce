@@ -43,19 +43,19 @@ def add_alarm_to_instances(instances):
     connection = boto.ec2.cloudwatch.connect_to_region('us-west-2')
     topic = 'arn:aws:sns:us-west-2:197873462522:scarp-cpu'
 
-    ids = [i.id for i in instances]
-    alarm = boto.ec2.cloudwatch.MetricAlarm(
-            name='low-cpu',
-            namespace='AWS/EC2',
-            metric='CPUUtilization',
-            statistic='Average',
-            period=60*5,
-            comparison='<=',
-            threshold=50,
-            evaluation_periods=2,
-            dimensions={'InstanceId' : [ids]},
-            alarm_actions=[topic])
-    connection.put_metric_alarm(alarm)
+    for i in instances:
+        alarm = boto.ec2.cloudwatch.MetricAlarm(
+                name='low-cpu-' + i.id,
+                namespace='AWS/EC2',
+                metric='CPUUtilization',
+                statistic='Average',
+                period=60*5,
+                comparison='<=',
+                threshold=50,
+                evaluation_periods=2,
+                dimensions={'InstanceId' : [i.id]},
+                alarm_actions=[topic])
+        connection.put_metric_alarm(alarm)
 
 def launch_reducer():
     
