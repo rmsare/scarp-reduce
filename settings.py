@@ -3,7 +3,7 @@ AWS_WORKER_INSTANCE_TYPE = 'c4.xlarge'
 AWS_REDUCER_INSTANCE_TYPE = 't2.medium'
 AWS_KEY_NAME = 'aws-scarp'
 AWS_SECURITY_GROUP = 'sg-2b925f50'
-AWS_WORKER_AMI = 'ami-34e0274c'
+AWS_WORKER_AMI = 'ami-25e92e5d'
 
 SSH_LOCAL_KEY = '/home/ubuntu/aws-scarp.pem'
 
@@ -21,6 +21,7 @@ sudo chown -R ubuntu /efs
 cd /home/ubuntu/scarp-reduce
 #git stash
 #git pull origin master
+screen -d -m ipython monitor.py 
 ipython match.py {} {} 200 200
 #sudo shutdown -h now"""
 
