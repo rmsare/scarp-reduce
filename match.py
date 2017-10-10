@@ -19,23 +19,9 @@ if __name__ == "__main__":
     pad_dy = int(sys.argv[4])
     ages = [age]
 
-   # min_age = np.float(sys.argv[2])
-   # max_age = np.float(sys.argv[3])
-   # d_age = 0.1
-
-   # if min_age == max_age:
-   #     ages = [min_age]
-   # else:
-   #     num_ages = int((max_age - min_age) / d_age)
-   #     ages = np.linspace(min_age, max_age, num_ages)
-
     local_data_directory = '/efs/data/'
     tiles = os.listdir(local_data_directory)
     local_results_directory = '/efs/results/'
-    for tile in tiles:
-        result_dir = local_results_directory + tile[:-4]
-        if not os.path.exists(result_dir):
-            os.mkdir(result_dir)
 
     logger.info("Starting Matcher for {} {:.2f}".format(d, ages[0]))
 
