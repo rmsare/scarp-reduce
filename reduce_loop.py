@@ -45,9 +45,10 @@ if __name__ == "__main__":
         last_key = download_data(remote_dir, last_key=last_key, batch_size=batch_size)
         logger.info("Launching matching jobs")
         launch_jobs(d, num_workers)
-        while len(os.listdir('/efs/results')) == 0:
+        while len(os.listdir('/efs/results')) < batch_size:
             sleep(5)
         logger.info("Reducing current results")
+        sleep(5*60) # XXX: debug purposes: need to see if all files successfully written
         reduce_current_data(num_workers)
         logger.info("Deleting data and working files")
         delete_local_files()
