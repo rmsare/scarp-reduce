@@ -1,5 +1,4 @@
-import os
-from shutil import copyfile
+import boto
 
 def form_results_name(code, llx, lly):
     """
