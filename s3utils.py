@@ -52,6 +52,28 @@ def download_data(remote_dir, last_key='', batch_size=100):
 
     return last_key
 
+def download_unprocessed_data(remote_dir):
+    dest_dir = '/efs/data/'
+    curdir = os.getcwd()
+    os.chdir(dest_dir)
+
+    connection = boto.connect_s3()
+    data_bucket = connection.get_bucket('scarp-data')
+    results_bucket = connection.get_bucket('scarp-results')
+    data = [k.name for k in data_bucket if remote_dir in k.name]
+    data.remove('ot-ncal/')
+    data = [f[8:18] for f in data] 
+    processed = [k.name[0:10] for k in results_bucket]
+    unprocessed = list(set(data) - set(processed))
+     
+    for tile in unprocessed:
+        fn = tile + '.tif'
+        key = data_bucket.get_key(remote_dir + fn)
+        if key:
+            key.get_contents_to_filename(fn)
+
+    os.chdir(curdir)
+
 def list_dir_s3(directory, bucket_name):
     connection = boto.connect_s3()
     bucket = connection.get_bucket(bucket_name, validate=False)
