@@ -1,2 +1,2 @@
 # scarp-reduce
-Sandbox for tree-based reduction of template matching results
+Sandbox for map-reduce style distributed template matching
