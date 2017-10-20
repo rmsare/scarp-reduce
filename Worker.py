@@ -49,9 +49,12 @@ class Matcher(object):
         self.source = source    
 
     def load_data(self):
-        # Load data from source file
-        # XXX: Assume data has been interpolated to remove nans
-        # XXX: Data is padded by pad_dx, pad_dy 
+        """
+        Load data from source file
+        """
+
+        # XXX: Assumes data has been interpolated to remove nans
+        # XXX: Assumes ata is padded by pad_dx, pad_dy 
         self.data = dem.DEMGrid(self.source)
         self.dx = self.data._georef_info.dx
         self.dy = self.data._georef_info.dy
@@ -63,12 +66,18 @@ class Matcher(object):
         self.logger.debug("Loaded data from {}".format(self.source))
     
     def match_template(self):
-        # Match template to data
+        """
+        Match template to current data
+        """
 
         return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age)
 
     def process(self, d, ages):
-        # Match templates for a list of parameters
+        """
+        Match templates for a list of parameters
+
+        Currently supports a simple length scale (d) and multiple ages (ages)
+        """
 
         start = timer()
         self.load_data()
@@ -83,22 +92,28 @@ class Matcher(object):
                 self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
-        # Match template, and save clipped (valid) results
+        """
+        Save clipped results for template match
+        """
 
+        # XXX: Assumes data is padded!
         self.results = self.match_template()
-        # XXX: Assume data is padded!
         np.save(self.path + self.filename, self.results[:, self.pad_dy:-self.pad_dy, self.pad_dx:-self.pad_dx])
         del self.results
 
     def set_params(self, age, d):
-        # Set worker template parameters
+        """
+        Set template parameters
+        """ 
 
         self.age = age
         self.d = d
         self.filename = 'results_{:.2f}.npy'.format(self.age)
 
     def set_source(self, source):
-        # Set data source location
+        """
+        Set data source filename
+        """
 
         self.source = source
 
@@ -114,7 +129,9 @@ class Reducer(object):
         self.logger = logger or logging.getLogger(__name__)
         
     def compare(self, file1, file2):
-        # Compare two search step results ndarrays
+        """
+        Load and compare two search step results, then save the best results 
+        """
 
         data1 = np.load(file1)
         data2 = np.load(file2)
@@ -127,7 +144,9 @@ class Reducer(object):
         return data2
     
     def reduce_all_results(self):
-        # Reduce results in all directories until all search steps have been compared
+        """
+        Reduce results in all directories until all search steps have been compared
+        """
 
         curdir = os.getcwd()
         subgrids = os.listdir(self.path)
@@ -164,6 +183,10 @@ class Reducer(object):
         os.chdir(curdir)
                 
     def reduce_current_directory(self):
+        """
+        Reduce all intermediate results files in current directory
+        """
+
         results = os.listdir('.')
         while len(results) > 1:
             results1 = results.pop()
@@ -179,6 +202,11 @@ class Reducer(object):
             results = os.listdir('.')
 
     def save_best_result(self, directory):
+        """
+        Save best results file to S3
+        """
+
+        # XXX: Assumes a single file remains after reduction
         tile = directory.strip('/')
         best_file = os.listdir('.')[0]
         results = np.load(best_file)    
@@ -189,11 +217,17 @@ class Reducer(object):
         self.logger.debug("Saved best results for {}".format(tile))
 
     def set_num_files(self, num_files):
-        # Number of files per directory (= number of workers/search steps)
+        """
+        Set the nNumber of files per directory to reduce
+        (= number of workers/search steps)
+        """
 
         self.num_files = num_files
     
     def set_path(self, path):
+        """
+        Set path for intermediate results mastwer directory
+        """
 
         self.path = path
 

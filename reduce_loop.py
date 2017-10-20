@@ -10,21 +10,30 @@ from datetime import datetime
 from Worker import Reducer
 
 def delete_local_files():
+    """
+    Delete files in EFS file hierarchy
+    """
+
     rmtree('/efs/data')
     rmtree('/efs/results')
     os.mkdir('/efs/data')
     os.mkdir('/efs/results')
 
 def reduce_current_data(num_files=35):
-    # Launch Reducer instance
+    """
+    Reduce intermediate results in current file hierarchy
+    """
+
     logger.info("Starting Reducer")
     reducer = Reducer('/efs/results/')
     reducer.set_num_files(num_files)
-
-    # Reduce results as they arrive
     reducer.reduce_all_results()
 
 def upload_log():
+    """
+    Upload logfile to S3 store and delete local copy
+    """
+
     outfilename = 'scarplet-' + datetime.now().isoformat() + '.log' 
     save_file_to_s3('/efs/logs/scarp_reduce.log', outfilename, bucket_name='scarp-log')
     os.remove('/efs/logs/scarp_reduce.log')
