@@ -7,13 +7,17 @@ from osgeo import gdal, osr
 
 from s3utils import save_tiff
 
+from progressbar import Bar, Percentage, ProgressBar, ETA
+
 if __name__ == "__main__":
-    results_dir = '/home/rmsare/r/scarplet/raw/'
-    working_dir = '/home/rmsare/r/scarplet/masked/'
+    results_dir = '/media/rmsare/GALLIUMOS/ot_results/ot-ncal/'
+    working_dir = results_dir + 'masked/'
     files = os.listdir(results_dir)
     files = [f for f in files if 'tif' in f]
-    for f in files:
-        print("processing {}...".format(f))
+    
+    pbar = ProgressBar(widgets=[Percentage(), ' ', Bar(), ' ', ETA()], maxval=len(files))
+    pbar.start()
+    for i, f in enumerate(files):
         tile_name = f[0:10]
         data_dir =  '/media/rmsare/GALLIUMOS/data/ot_data/tif/2m/'
         data = dem.DEMGrid(data_dir + tile_name + '.tif')
@@ -40,5 +44,5 @@ if __name__ == "__main__":
         srs = osr.SpatialReference()
         srs.ImportFromWkt(inraster.GetProjectionRef())
         outraster.SetProjection(srs.ExportToWkt())
-
+        pbar.update(i+1)
 
