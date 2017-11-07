@@ -46,9 +46,9 @@ if __name__ == "__main__":
             logger.info("Downloading batch beginning with " + last_key)
             num_files = batch_size - len(files)
             last_key = download_data(remote_dir, last_key=last_key, batch_size=num_files)
-            for f in os.listdir(data_dir):
-                directory = f.strip('.tif')
-                if not os.path.exists('/efs/results/' + directory):
-                    os.mkdir('/efs/results/' + directory)
             files = os.listdir(data_dir)
+        for f in os.listdir(data_dir):
+            directory = f[:-4]
+            if not os.path.exists('/efs/results/' + directory):
+                os.mkdir('/efs/results/' + directory)
         finished_processing = last_key is None
