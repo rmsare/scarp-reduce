@@ -24,7 +24,7 @@ if __name__ == "__main__":
     average_cpu_usage = total_cpu_usage / periods
 
     while True:
-        if periods == max_periods:
+        if periods > max_periods:
             periods = 1
             total_cpu_usage = psutil.cpu_percent()
             average_cpu_usage = total_cpu_usage / periods
