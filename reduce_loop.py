@@ -46,6 +46,9 @@ if __name__ == "__main__":
 
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
+        
+    logger.info("Launching matching jobs")
+    launch_jobs(d, num_workers)
 
     #last_key = ''
     finished_processing = False
@@ -55,9 +58,6 @@ if __name__ == "__main__":
         #for f in os.listdir('/efs/data'):
             #directory = f.strip('.tif')
             #os.mkdir('/efs/results/' + directory)
-
-        logger.info("Launching matching jobs")
-        launch_jobs(d, num_workers)
 
         logger.info("Reducing current results")
         reduce_current_data(num_workers)
