@@ -151,12 +151,16 @@ def terminate_instances(name="Worker"):
 
 if __name__ == "__main__":
 
-    d =int(sys.argv[1]) 
-    min_age = 0
-    max_age = 3.5 
-    d_age = 0.1
+ 
+    #d_age = 0.1
     #num_ages = int((max_age - min_age) / d_age)
+    
+    d = int(sys.argv[1]) 
     num_workers = int(sys.argv[2])
+    remote_dir = sys.argv[3]
+    
+    min_age = 0
+    max_age = 3.5
     ages = np.linspace(min_age, max_age, num_workers) 
 
     start = timer()
@@ -181,7 +185,7 @@ if __name__ == "__main__":
     stop = timer()
 
     #reducer_instance = launch_reducer()
-    #reducer_script = REDUCER_SCRIPT.format(num_ages)
+    #reducer_script = REDUCER_SCRIPT.format(num_workers, remote_dir, d, num_workers, remote_dir)
     #upload_and_run_script(reducer_script, reducer_instance)
     #print("{}: Started reducer".format(reducer_instance.public_dns_name))
 
