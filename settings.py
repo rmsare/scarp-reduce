@@ -10,7 +10,8 @@ SSH_LOCAL_KEY = '/home/ubuntu/aws-scarp.pem'
 REDUCER_SCRIPT = """#!/bin/bash
 cd /home/ubuntu/scarp-reduce
 #git pull origin master
-ipython reduce_loop.py {} {} {} {}
+screen -d -m ipython manage_data.py {} {}
+screen -d- m ipython reduce_loop.py {} {} {} {}
 #sudo shutdown -h now"""
 
 WORKER_SCRIPT = """#!/bin/bash
