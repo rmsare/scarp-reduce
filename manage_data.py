@@ -22,18 +22,19 @@ def delete_local_files():
 if __name__ == "__main__":
     num_workers = int(sys.argv[1])
     remote_dir = sys.argv[2]
+    batch_size = 20
     data_dir = '/efs/data/'
 
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
 
-    last_key = ''
+    last_key = 'fg484_4334.tif' 
     finished_processing = False
     while not finished_processing:
         files = os.listdir(data_dir)
-        while len(files) < num_workers:
+        while len(files) < batch_size:
             logger.info("Downloading batch beginning with " + last_key)
-            num_files = num_workers - len(files)
+            num_files = batch_size - len(files)
             last_key = download_data(remote_dir, last_key=last_key, batch_size=num_files)
             for f in os.listdir(data_dir):
                 directory = f.strip('.tif')
