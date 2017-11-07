@@ -17,12 +17,19 @@ if __name__ == "__main__":
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
     sleep(interval) # Allow matching job some startup time
+
     periods = 1.
-    total_cpu_usage = 0.
-    average_cpu_usage = 0.
+    total_cpu_usage = psutil.cpu_percent()
+    average_cpu_usage = total_cpu_usage / periods
 
     while True:
-        if average_cpu_usage < 50.0:
+        sleep(interval)
+            
+        periods += 1
+        total_cpu_usage += psutil.cpu_percent()
+        average_cpu_usage = total_cpu_usage / periods
+
+        if average_cpu_usage < 25.0:
             commands = []
             #commands.append(['sudo', 'umount', '-f', '/efs'])
             #commands.append(['sudo', 'mount', '-t', 'nfs4', '-o', 'nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2', 'fs-2fab1c86.efs.us-west-2.amazonaws.com:/', '/efs'])
@@ -39,10 +46,5 @@ if __name__ == "__main__":
             for c in commands:
                 subprocess.call(c)
         
-        sleep(interval)
-            
-        periods += 1
-        total_cpu_usage += psutil.cpu_percent()
-        average_cpu_usage = total_cpu_usage / periods
 
         
