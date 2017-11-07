@@ -42,7 +42,7 @@ if __name__ == "__main__":
     d = int(sys.argv[1])
     num_workers = int(sys.argv[2])
     remote_dir = sys.argv[3]
-    batch_size = int(sys.argv[4])
+    #batch_size = int(sys.argv[4])
 
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         #delete_local_files()
 
         #finished_processing = last_key is None
-        finished_processing = len(os.listdir('/efs/data') == 0
+        finished_processing = len(os.listdir('/efs/data')) == 0
 
     logger.info("Uploading log")
     upload_log()
