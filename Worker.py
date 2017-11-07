@@ -126,7 +126,7 @@ class Reducer(object):
         self.path = path
         self.tile_name = path.split('/')[-1]
         self.best_results = None
-        self.data_dir = '/efs/results/'
+        self.data_dir = '/efs/data/'
         self.logger = logger or logging.getLogger(__name__)
         
     def compare(self, file1, file2):
