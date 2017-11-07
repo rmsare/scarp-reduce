@@ -84,13 +84,13 @@ def upload_and_run_script(script, instance):
         f.write(script)
 
     commands = []
-    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo killall ipython'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo killall ipython screen'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -wipe'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo sysctl -w vm.drop_caches=3'])
     commands.append(['scp', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no', 'runme.sh', 'ubuntu@' + dns + ':/home/ubuntu/'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'sudo /etc/init.d/screen-cleanup start'])
-    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ipython /home/ubuntu/scarp-reduce/monitor.py'])
     commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m chmod +x runme.sh'])
-    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, 'screen -d -m ./runme.sh'])
+    commands.append(['ssh', '-o IdentityFile=/home/ubuntu/aws-scarp.pem', '-o StrictHostKeyChecking=no','ubuntu@' + dns, './runme.sh'])
     
     DEVNULL = open(os.devnull, 'w')
     for command in commands:
@@ -135,7 +135,7 @@ def launch_jobs(d, num_workers):
     else:
         workers = old_workers
         
-    add_alarm_to_instances(workers)
+    #add_alarm_to_instances(workers)
     
     for age, instance in zip(ages, workers):
         run_job(instance, [d, age])
@@ -171,8 +171,8 @@ if __name__ == "__main__":
     print("Starting {} new nodes...".format(num_workers))
 
     workers = launch_workers(num_workers)
-    print("Adding CPU usage alarms to instances...")
-    add_alarm_to_instances(workers)
+    #print("Adding CPU usage alarms to instances...")
+    #add_alarm_to_instances(workers)
     workers.extend(old_workers)
 
 
@@ -181,6 +181,7 @@ if __name__ == "__main__":
 
     start = timer()
     for age, instance in zip(ages, workers):
+        #upload_and_run_script(STARTUP_SCRIPT, instance)
         run_job(instance, [d, age])
     stop = timer()
 
