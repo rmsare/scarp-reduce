@@ -126,6 +126,7 @@ class Reducer(object):
         self.path = path
         self.tile_name = path.split('/')[-1]
         self.best_results = None
+        self.data_dir = '/efs/results/'
         self.logger = logger or logging.getLogger(__name__)
         
     def compare(self, file1, file2):
@@ -169,7 +170,7 @@ class Reducer(object):
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
-                    os.remove('/efs/data/' + directory + '.tif')
+                    os.remove(self.data_dir + directory + '.tif')
                     os.chdir('..')
                     rmtree(directory)
                 else:
