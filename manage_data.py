@@ -9,6 +9,14 @@ from time import sleep
 from datetime import datetime
 from Worker import Reducer
 
+
+def create_local_filesystem():
+
+    working_dirs = ['/efs/data/', '/efs/results/', '/efs/logs/']
+    for f in working_dirs:
+        if not os.path.exists(f):
+            os.mkdir(f)
+
 def delete_local_files():
     """
     Delete files in EFS file hierarchy
@@ -24,6 +32,8 @@ if __name__ == "__main__":
     remote_dir = sys.argv[2]
     batch_size = 20
     data_dir = '/efs/data/'
+
+    create_local_filesystem()
 
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
