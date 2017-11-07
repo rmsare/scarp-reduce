@@ -47,28 +47,29 @@ if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
 
-    last_key = ''
-    finished_processing = last_key is None
+    #last_key = ''
+    finished_processing = False
     while not finished_processing:
-        logger.info("Downloading batch beginning with " + last_key)
-        last_key = download_data(remote_dir, last_key=last_key, batch_size=batch_size)
-        for f in os.listdir('/efs/data'):
-            directory = f.strip('.tif')
-            os.mkdir('/efs/results/' + directory)
+        #logger.info("Downloading batch beginning with " + last_key)
+        #last_key = download_data(remote_dir, last_key=last_key, batch_size=batch_size)
+        #for f in os.listdir('/efs/data'):
+            #directory = f.strip('.tif')
+            #os.mkdir('/efs/results/' + directory)
 
         logger.info("Launching matching jobs")
         launch_jobs(d, num_workers)
 
         logger.info("Reducing current results")
-        sleep(2*60) # XXX: debug purposes: need to see if all files successfully written
         reduce_current_data(num_workers)
 
-        logger.info("Deleting data and working files")
-        delete_local_files()
+        #logger.info("Deleting data and working files")
+        #delete_local_files()
 
-        logger.info("Uploading log")
-        upload_log()
-        finished_processing = last_key is None
+        #finished_processing = last_key is None
+        finished_processing = len(os.listdir('/efs/data') == 0
+
+    logger.info("Uploading log")
+    upload_log()
 
         
 
