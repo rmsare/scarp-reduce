@@ -12,7 +12,7 @@ if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
 
-    interval = 30
+    interval = 15 
     max_periods = 4
     
     this_pid = os.getpid()
