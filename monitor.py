@@ -12,7 +12,8 @@ if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('scarp_reduce')
 
-    interval = 60
+    interval = 30
+    max_periods = 4
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
@@ -23,11 +24,15 @@ if __name__ == "__main__":
     average_cpu_usage = total_cpu_usage / periods
 
     while True:
-        sleep(interval)
-            
-        periods += 1
-        total_cpu_usage += psutil.cpu_percent()
-        average_cpu_usage = total_cpu_usage / periods
+        if periods == max_periods:
+            periods = 1
+            total_cpu_usage = psutil.cpu_percent()
+            average_cpu_usage = total_cpu_usage / periods
+        else:
+            sleep(interval)
+            periods += 1
+            total_cpu_usage += psutil.cpu_percent()
+            average_cpu_usage = total_cpu_usage / periods
 
         if average_cpu_usage < 25.0:
             commands = []
