@@ -22,7 +22,7 @@ if __name__ == "__main__":
         if psutil.cpu_percent() < 25.0:
             commands = []
             commands.append(['sudo', 'umount', '-f', '/efs'])
-            commands.append(['sudo', 'mount', '-t', 'nfs4', '-o', 'nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2', 'fs-c2e54c6b.efs.us-west-2.amazonaws.com:/', '/efs'])
+            commands.append(['sudo', 'mount', '-t', 'nfs4', '-o', 'nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2', 'fs-2fab1c86.efs.us-west-2.amazonaws.com:/', '/efs'])
             commands.append(['sudo', 'chown', '-R', 'ubuntu', '/efs'])
 
             for p in psutil.process_iter():
