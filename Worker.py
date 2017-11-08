@@ -94,8 +94,6 @@ class Matcher(object):
                 unprocessed_ages = list(set(ages) - set(processed_ages))
                 this_age = np.random.choice(unprocessed_ages)
                 self.set_params(this_age, d)
-                with open(self.path + self.filename, 'w') as f:
-                    f.write('')
                 self.save_template_match()
                 stop = timer()
                 self.logger.debug("Processed:\t {}".format(self.source))
