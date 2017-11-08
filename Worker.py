@@ -84,12 +84,15 @@ class Matcher(object):
         
         for age in ages:
             self.set_params(age, d)
-            if not os.path.exists(self.path + self.filename) and os.path.exists(self.path):
-                self.save_template_match()
-                stop = timer()
-                self.logger.debug("Processed:\t {}".format(self.source))
-                self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
-                self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
+            if os.path.exists(self.path):
+                files = os.listdir(self.path)
+                not_reduced = np.all([len(f) == 16 for f in files])
+                if not_reduced and not os.path.exists(self.path + self.filename):
+                    self.save_template_match()
+                    stop = timer()
+                    self.logger.debug("Processed:\t {}".format(self.source))
+                    self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
+                    self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         """
