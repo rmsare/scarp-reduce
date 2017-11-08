@@ -91,10 +91,10 @@ class Matcher(object):
                 ages = np.linspace(0, 3.5, 35)
                 ages = [float('{:.2f}'.format(x)) for x in ages]
                 processed_ages = [float(f[8:11]) for f in files]
-                unprocessed_ages = set(ages) - set(processed_ages)
-                this_age = unprocessed_ages.min()
+                unprocessed_ages = list(set(ages) - set(processed_ages))
+                this_age = min(unprocessed_ages)
                 self.set_params(this_age, d)
-                with open(self.path + self.filename) as f:
+                with open(self.path + self.filename, 'w') as f:
                     f.write('')
                 self.save_template_match()
                 stop = timer()
