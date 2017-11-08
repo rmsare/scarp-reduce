@@ -81,13 +81,14 @@ class Matcher(object):
 
         start = timer()
         self.load_data()
-        if os.path.exists(self.path):
-            files = os.listdir(self.path)
-            not_reduced = np.all([len(f) == 16 for f in files])
-            not_full = len(files) < 35
-            
+        this_age = ages[0]
+        self.set_params(this_age, d)
+        files = os.listdir(self.path)
+        not_reduced = np.all([len(f) == 16 for f in files])
+        not_full = len(files) < 35
+        if not_full and not_reduced:
+            if os.path.exists(self.path + self.filename):
             # XXX: This is awful, use a job queue
-            if not_full and not_reduced:
                 ages = np.linspace(0, 3.5, 35)
                 ages = [float('{:.2f}'.format(x)) for x in ages]
                 processed_ages = [float(f[8:11]) for f in files]
@@ -96,9 +97,13 @@ class Matcher(object):
                 self.set_params(this_age, d)
                 self.save_template_match()
                 stop = timer()
-                self.logger.debug("Processed:\t {}".format(self.source))
-                self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
-                self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
+            else:
+                self.save_template_match()
+                stop = timer()
+
+        self.logger.debug("Processed:\t {}".format(self.source))
+        self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
+        self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         """
