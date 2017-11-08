@@ -35,4 +35,5 @@ if __name__ == "__main__":
             worker.process(d, ages)
             logger.debug("Finished processing {}, {} {:.2f}".format(tile, d, ages[0]))
         files = os.listdir(local_data_directory)
+        files.sort()
         finished_processing = len(files) == 0
