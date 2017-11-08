@@ -26,6 +26,7 @@ if __name__ == "__main__":
     logger.info("Starting Matcher for {} {:.2f}".format(d, ages[0]))
 
     files = os.listdir(local_data_directory)
+    np.random.shuffle(files)
     finished_processing = False
     while not finished_processing:
         for tile in files:
