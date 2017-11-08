@@ -17,7 +17,7 @@ if __name__ == "__main__":
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
-    sleep(interval) # Allow matching job some startup time
+    sleep(max_periods * interval) # Allow matching job some startup time
 
     periods = 1.
     total_cpu_usage = psutil.cpu_percent()
