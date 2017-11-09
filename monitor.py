@@ -13,13 +13,13 @@ if __name__ == "__main__":
     logger = logging.getLogger('scarp_reduce')
 
     interval = 15 
-    max_periods = 4
+    max_periods = 2
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
 
     cpu_usage = []
-    for _ in range(max_periods):
+    for _ in range(2 * max_periods):
         sleep(interval) # Allow matching job some startup time
         cpu_usage.append(psutil.cpu_percent())
 
