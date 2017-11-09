@@ -17,22 +17,18 @@ if __name__ == "__main__":
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
-    sleep(max_periods * interval) # Allow matching job some startup time
 
-    periods = 1.
-    total_cpu_usage = psutil.cpu_percent()
-    average_cpu_usage = total_cpu_usage / periods
+    cpu_usage = []
+    for _ in range(max_periods):
+        sleep(interval) # Allow matching job some startup time
+        cpu_usage.append(psutil.cpu_percent())
 
     while True:
-        if periods > max_periods:
-            periods = 1
-            total_cpu_usage = psutil.cpu_percent()
-            average_cpu_usage = total_cpu_usage / periods
-        else:
-            sleep(interval)
-            periods += 1
-            total_cpu_usage += psutil.cpu_percent()
-            average_cpu_usage = total_cpu_usage / periods
+        sleep(interval)
+        cpu_usage.append(psutil.cpu_percent())
+        cpu_usage = cpu_usage[-int(max_periods)::]
+
+        average_cpu_usage = np.sum(cpu_usage) / max_periods
 
         if average_cpu_usage < 10.0:
             commands = []
