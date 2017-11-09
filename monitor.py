@@ -13,7 +13,7 @@ if __name__ == "__main__":
     logger = logging.getLogger('scarp_reduce')
 
     interval = 15 
-    max_periods = 4
+    max_periods = 8
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
