@@ -84,9 +84,8 @@ class Matcher(object):
         this_age = ages[0]
         self.set_params(this_age, d)
         files = os.listdir(self.path)
-        not_reduced = np.any([len(f) > 16 for f in files])
         not_full = len(files) < 35
-        if not_full and not_reduced:
+        if not_full:
             if os.path.exists(self.path + self.filename):
             # XXX: This is awful, use a job queue
                 ages = np.linspace(0, 3.5, 35)
