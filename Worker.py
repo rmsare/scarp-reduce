@@ -96,10 +96,9 @@ class Matcher(object):
                 this_age = np.random.choice(unprocessed_ages)
                 self.set_params(this_age, d)
                 self.save_template_match()
-                stop = timer()
             else:
                 self.save_template_match()
-                stop = timer()
+        stop = timer()
 
         self.logger.debug("Processed:\t {}".format(self.source))
         self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
