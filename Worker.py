@@ -90,7 +90,7 @@ class Matcher(object):
             # XXX: This is awful, use a job queue
                 ages = np.linspace(0, 3.5, 35)
                 ages = [float('{:.2f}'.format(x)) for x in ages]
-                processed_ages = [float(f[8:11]) for f in files]
+                processed_ages = [float(f[8:12]) for f in files]
                 unprocessed_ages = list(set(ages) - set(processed_ages))
                 this_age = np.random.choice(unprocessed_ages)
                 self.set_params(this_age, d)
