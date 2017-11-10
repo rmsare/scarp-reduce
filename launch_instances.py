@@ -1,9 +1,10 @@
 import boto.ec2
 import boto.ec2.cloudwatch
-import os, time
+import os
 import subprocess
 import numpy as np
 
+from time import sleep
 from timeit import default_timer as timer
 
 from boto.manage.cmdshell import sshclient_from_instance
@@ -32,7 +33,7 @@ def launch_workers(num_workers):
 
     for instance in new_reservation.instances:
         while instance.state == u'pending':
-            time.sleep(2)
+            sleep(2)
             instance.update()
         upload_and_run_script(STARTUP_SCRIPT, instance)
     
@@ -44,17 +45,19 @@ def add_alarm_to_instances(instances):
     topic = 'arn:aws:sns:us-west-2:197873462522:scarp-cpu'
 
     for i in instances:
+        sleep(1)
         alarm = boto.ec2.cloudwatch.MetricAlarm(
                 name='low-cpu-' + i.id,
                 namespace='AWS/EC2',
                 metric='CPUUtilization',
                 statistic='Average',
-                period=60*5,
+                period=300,
                 comparison='<=',
-                threshold=50,
-                evaluation_periods=2,
+                threshold=10,
+                evaluation_periods=5,
                 dimensions={'InstanceId' : [i.id]},
                 alarm_actions=[topic])
+        alarm.add_alarm_action('arn:aws:automate:us-west-2:ec2:terminate')
         connection.put_metric_alarm(alarm)
 
 def launch_reducer():
@@ -70,7 +73,7 @@ def launch_reducer():
                             {"Name" : "Reducer"})
     
     while instance.state == u'pending':
-        time.sleep(5)
+        sleep(5)
         instance.update()
 
     return instance
@@ -135,7 +138,7 @@ def launch_jobs(d, num_workers):
     else:
         workers = old_workers
         
-    #add_alarm_to_instances(workers)
+    add_alarm_to_instances(workers)
     
     for age, instance in zip(ages, workers):
         run_job(instance, [d, age])
@@ -181,7 +184,7 @@ if __name__ == "__main__":
 
     start = timer()
     for age, instance in zip(ages, workers):
-        #upload_and_run_script(STARTUP_SCRIPT, instance)
+        upload_and_run_script(STARTUP_SCRIPT, instance)
         run_job(instance, [d, age])
     stop = timer()
 
