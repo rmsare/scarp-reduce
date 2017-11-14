@@ -15,7 +15,7 @@ def tile_data(filename, nx, ny, code='tiles/fg'):
         data = dataset.read(1)
         num_rows, num_cols = data.shape
         
-        transform = data.transform
+        transform = dataset.transform
         ulx = transform[0]
         uly = transform[3]
         dx = transform[1]
@@ -37,7 +37,8 @@ def tile_data(filename, nx, ny, code='tiles/fg'):
                         transform=new_transform, 
                         dtype=rasterio.float32,
                         mode='w') as out:
-                    out.write(data[i:i + ny, j:j + nx], 1)
+                    if i + ny < data.height and j + nx < data.width:
+                        out.write(data[i:i + ny, j:j + nx], 1)
 
 if __name__ == "__main__":
     filename = sys.argv[1]
