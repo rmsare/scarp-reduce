@@ -81,15 +81,27 @@ class Matcher(object):
 
         start = timer()
         self.load_data()
-        
-        for age in ages:
-            self.set_params(age, d)
-            if not os.path.exists(self.path + self.filename) and os.path.exists(self.path):
+        this_age = ages[0]
+        self.set_params(this_age, d)
+        files = os.listdir(self.path)
+        not_full = len(files) < 35
+        if not_full:
+            if os.path.exists(self.path + self.filename):
+            # XXX: This is awful, use a job queue
+                ages = np.linspace(0, 3.5, 35)
+                ages = [float('{:.2f}'.format(x)) for x in ages]
+                processed_ages = [float(f[8:12]) for f in files]
+                unprocessed_ages = list(set(ages) - set(processed_ages))
+                this_age = np.random.choice(unprocessed_ages)
+                self.set_params(this_age, d)
                 self.save_template_match()
-                stop = timer()
-                self.logger.debug("Processed:\t {}".format(self.source))
-                self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
-                self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
+            else:
+                self.save_template_match()
+        stop = timer()
+
+        self.logger.debug("Processed:\t {}".format(self.source))
+        self.logger.debug("Paramaters:\t d = {:d}, logkt = {:.2f}".format(int(self.d), self.age))
+        self.logger.debug("Elapsed time:\t {:.2f} s".format(stop - start))
 
     def save_template_match(self):
         """
@@ -126,6 +138,7 @@ class Reducer(object):
         self.path = path
         self.tile_name = path.split('/')[-1]
         self.best_results = None
+        self.data_dir = '/efs/data/'
         self.logger = logger or logging.getLogger(__name__)
         
     def compare(self, file1, file2):
@@ -169,7 +182,7 @@ class Reducer(object):
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
-                    os.remove('/efs/data/' + directory + '.tif')
+                    os.remove(self.data_dir + directory + '.tif')
                     os.chdir('..')
                     rmtree(directory)
                 else:

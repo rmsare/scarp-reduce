@@ -107,13 +107,18 @@ def save_file_to_s3(infilename, outfilename, bucket_name):
     key.set_contents_from_filename(infilename)
     key.set_canned_acl('public-read')
 
-def save_tiff(array, tile, data_dir='/efs/data/', results_dir='/efs/results/'):
+def save_tiff(array, tile, pad=0, data_dir='/efs/data/', results_dir='/efs/results/'):
     filename = tile  + '_results.tif'
     nbands, nrows, ncols = array.shape
 
     data_file = data_dir + tile + '.tif'
     inraster = gdal.Open(data_file)
     transform = inraster.GetGeoTransform()
+    
+    if pad > 0:
+        new_ulx = transform[0] + pad
+        new_uly = transform[3] - pad
+        transform = (new_ulx, transform[1], transform[2], new_uly, transform[4], transform[5])
     
     driver = gdal.GetDriverByName('GTiff')
     outraster = driver.Create(results_dir + filename, ncols, nrows, nbands, gdal.GDT_Float32)
