@@ -1,6 +1,8 @@
 import os, sys
 import rasterio
 
+import numpy as np
+
 def define_tile_transform(transform, row_idx, col_idx):
     dx = transform[1]
     dy = np.abs(transform[5])
@@ -37,8 +39,8 @@ def tile_data(filename, nx, ny, code='tiles/fg'):
                         transform=new_transform, 
                         dtype=rasterio.float32,
                         mode='w') as out:
-                    if i + ny < data.height and j + nx < data.width:
-                        out.write(data[i:i + ny, j:j + nx], 1)
+                    if i + ny < dataset.height and j + nx < dataset.width:
+                        out.write(data[i:i + ny, j:j + nx].astype(rasterio.float32), 1)
 
 if __name__ == "__main__":
     filename = sys.argv[1]
