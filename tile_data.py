@@ -3,8 +3,6 @@ import rasterio
 
 import numpy as np
 
-from rasterio.fill import fillnodata
-
 def define_tile_transform(transform, row_idx, col_idx):
     dx = transform[1]
     dy = np.abs(transform[5])
@@ -17,7 +15,6 @@ def define_tile_transform(transform, row_idx, col_idx):
 def tile_data(filename, width_m, height_m, code='tiles/fg'):
     with rasterio.open(filename, 'r') as dataset:
         data = dataset.read(1).astype(rasterio.float32)
-        data[data == 0] = np.nan
         num_rows, num_cols = data.shape
         
         transform = dataset.transform
