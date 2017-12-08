@@ -107,7 +107,7 @@ def save_file_to_s3(infilename, outfilename, bucket_name):
     key.set_contents_from_filename(infilename)
     key.set_canned_acl('public-read')
 
-def save_tiff(array, tile, pad=0, data_dir='/efs/data/', results_dir='/efs/results/'):
+def save_tiff(array, tile, pad=0, data_dir='/efs/working/', results_dir='/efs/reducing/'):
     filename = tile  + '_results.tif'
     nbands, nrows, ncols = array.shape
 
