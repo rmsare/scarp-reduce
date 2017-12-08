@@ -9,13 +9,13 @@ from osgeo import gdal, osr
 from datetime import datetime, timedelta
 from merge_grids import neighbors
 
-def delete_file_from_s3(filename, bucket_name):
+def delete_file_from_s3(filename, bucket_name=None):
     connection = boto.connect_s3()
     bucket = connection.get_bucket(bucket_name, validate=False)
     key = bucket.get_key(filename)
     bucket.delete_key(key.name)
 
-def delete_old_keys_from_s3(max_age, bucket_name, subdirectory='', bad_substring=''):
+def delete_old_keys_from_s3(max_age, bucket_name=None, subdirectory='', bad_substring=''):
     if subdirectory[-1] is not '/':
         subdirectory += '/'
     connection = boto.connect_s3()
@@ -74,7 +74,7 @@ def download_unprocessed_data(remote_dir):
 
     os.chdir(curdir)
 
-def list_dir_s3(directory, bucket_name):
+def list_dir_s3(directory, bucket_name=None):
     connection = boto.connect_s3()
     bucket = connection.get_bucket(bucket_name, validate=False)
     keys = bucket.get_all_keys(prefix=directory)
@@ -83,7 +83,7 @@ def list_dir_s3(directory, bucket_name):
     #filenames.remove('')
     return filenames
 
-def download_data_from_s3(infilename, outfilename, bucket_name):
+def download_data_from_s3(infilename, outfilename, bucket_name=None):
     connection = boto.connect_s3()
     bucket = connection.get_bucket(bucket_name, validate=False)
     key = bucket.new_key(infilename)
@@ -100,7 +100,7 @@ def save_data_to_s3(data, filename=None, bucket_name=None):
     key.set_contents_from_filename(filename)
     key.set_canned_acl('public-read')
 
-def save_file_to_s3(infilename, outfilename, bucket_name):
+def save_file_to_s3(infilename, outfilename, bucket_name=None):
     connection = boto.connect_s3()
     bucket = connection.get_bucket(bucket_name, validate=False)
     key = bucket.new_key(outfilename)
