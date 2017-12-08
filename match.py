@@ -33,7 +33,7 @@ if __name__ == "__main__":
     while not finished_processing:
         for tile in files:
             logger.debug("Starting Matcher for {}, {} {:.2f}".format(tile, d, ages[0]))
-            worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
+            worker = Matcher(local_data_directory + tile, pad_dx, pad_dy, ang_max, ang_min) 
             worker.process(d, ages, ang_max, ang_min)
             logger.debug("Finished processing {}, {} {:.2f}".format(tile, d, ages[0]))
         files = os.listdir(local_data_directory)
