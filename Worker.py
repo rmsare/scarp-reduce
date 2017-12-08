@@ -39,6 +39,8 @@ class Matcher(object):
     def __init__(self, source, pad_dx, pad_dy, base_path='/efs/results/'):
         self.age = None
         self. d = None
+        self.ang_max = None
+        self.ang_min = None
         self.pad_dx = pad_dx
         self.pad_dy = pad_dy
         self.logger = logger or logging.getLogger(__name__)
@@ -70,9 +72,9 @@ class Matcher(object):
         Match template to current data
         """
 
-        return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age)
+        return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age, self.ang_max, self.ang_min)
 
-    def process(self, d, ages):
+    def process(self, d, ages, ang_max, ang_min):
         """
         Match templates for a list of parameters
 
@@ -82,9 +84,9 @@ class Matcher(object):
         start = timer()
         self.load_data()
         this_age = ages[0]
-        self.set_params(this_age, d)
+        self.set_params(this_age, d, ang_max, ang_min)
         files = os.listdir(self.path)
-        not_full = len(files) < 35
+        not_full = len(files) < 35 # XXX: change to parameter
         if not_full:
             if os.path.exists(self.path + self.filename):
             # XXX: This is awful, use a job queue
@@ -113,13 +115,15 @@ class Matcher(object):
         np.save(self.path + self.filename, self.results[:, self.pad_dy:-self.pad_dy, self.pad_dx:-self.pad_dx])
         del self.results
 
-    def set_params(self, age, d):
+    def set_params(self, age, d, ang_max, ang_min):
         """
         Set template parameters
         """ 
 
         self.age = age
         self.d = d
+        self.ang_max = ang_max
+        self.ang_min = ang_min
         self.filename = 'results_{:.2f}.npy'.format(self.age)
 
     def set_source(self, source):
