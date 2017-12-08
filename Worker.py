@@ -36,11 +36,11 @@ class Worker(object):
 
 class Matcher(object):
     
-    def __init__(self, source, pad_dx, pad_dy, base_path='/efs/results/'):
+    def __init__(self, source, pad_dx, pad_dy, ang_max, ang_min, base_path='/efs/results/'):
         self.age = None
         self. d = None
-        self.ang_max = None
-        self.ang_min = None
+        self.ang_max = ang_max
+        self.ang_min = ang_min
         self.pad_dx = pad_dx
         self.pad_dy = pad_dy
         self.logger = logger or logging.getLogger(__name__)
