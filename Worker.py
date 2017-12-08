@@ -13,7 +13,7 @@ from osgeo import gdal, osr
 
 from s3utils import save_file_to_s3, save_tiff
 
-from shutil import rmtree
+from shutil import move, rmtree
 from time import sleep
 from timeit import default_timer as timer
 
@@ -179,18 +179,18 @@ class Reducer(object):
         self.files_processed = 0
         while self.files_processed < total_files:
             for directory in os.listdir(self.path):
-                os.chdir(directory)
-                if len(os.listdir('.')) == self.num_files:
+                if len(os.listdir(directory)) == self.num_files:
+                    move(directory, '/efs/reducing/' + directory)
+                    move('/efs/data/' + directory + '.tif', '/efs/working/' + directory + '.tif')
+                    os.chdir('/efs/reducing/' + directory)
                     self.reduce_current_directory()
                     now = timer()
                     self.logger.info("Done with {}".format(directory))
                     self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
-                    os.remove(self.data_dir + directory + '.tif')
-                    os.chdir('..')
-                    rmtree(directory)
-                else:
-                    os.chdir('..')
+                    os.chdir(self.path)
+                    rmtree('/efs//reducing/' + directory)
+                    os.remove('/efs/working/' + directory + '.tif')
 
         stop = timer()
         average_time = (stop - start) / num_subgrids
