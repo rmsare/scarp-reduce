@@ -72,7 +72,7 @@ class Matcher(object):
         Match template to current data
         """
 
-        return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age, self.ang_max, self.ang_min)
+        return scarplet.calculate_best_fit_parameters(self.data, Scarp, self.d, self.age, ang_max=self.ang_max, ang_min=self.ang_min)
 
     def process(self, d, ages, ang_max, ang_min):
         """
