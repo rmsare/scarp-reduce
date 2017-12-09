@@ -13,7 +13,7 @@ if __name__ == "__main__":
     logger = logging.getLogger('scarp_reduce')
 
     interval = 15 
-    max_periods = 2
+    max_periods = 4
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
@@ -49,6 +49,3 @@ if __name__ == "__main__":
 
             for c in commands:
                 subprocess.call(c)
-        
-
-        
