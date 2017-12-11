@@ -39,7 +39,7 @@ if __name__ == "__main__":
             for p in psutil.process_iter():
                 if 'ipython' in p.name() and p.pid != this_pid:
                     commands.append(['sudo', 'kill', '{}'.format(p.pid)])
-                elif p.pid == this_pid:
+                if p.pid == this_pid:
                     kill_me = ['sudo', 'kill', '{}'.format(p.pid)]
 
             commands.append(['sudo', 'sysctl', '-w',  'vm.drop_caches=3'])
