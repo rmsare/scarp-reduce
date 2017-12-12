@@ -16,8 +16,7 @@ screen -d- m ipython reduce_loop.py {} {} {} {}
 
 WORKER_SCRIPT = """#!/bin/bash
 cd /home/ubuntu/scarp-reduce
-screen -d -m ipython monitor.py 
-ipython match.py {} {} 200 200
+ipython -c "%run match.py {} {} {} {} {} {}"
 #sudo shutdown -h now"""
 
 STARTUP_SCRIPT = """#!/bin/bash
