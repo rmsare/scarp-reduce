@@ -44,8 +44,8 @@ if __name__ == "__main__":
 
             commands.append(['sudo', 'sysctl', '-w',  'vm.drop_caches=3'])
             commands.append(['screen', '-wipe'])
-            commands.append(['screen -d -m ./runme.sh'])
-            commands.append(kill_me)
+            commands.append(['screen', '-d', '-m', '/home/ubuntu/runme.sh'])
+            #commands.append(kill_me)
 
             for c in commands:
                 subprocess.call(c)
