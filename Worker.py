@@ -172,9 +172,6 @@ class Reducer(object):
         start = timer()
 
         num_subgrids = len(subgrids)
-        total_files = num_subgrids * (self.num_files - 1)
-        self.logger.debug("Reducing {} grids".format(num_subgrids))
-        self.logger.debug("Expecting {} files total".format(total_files))
 
         self.files_processed = 0
         while self.files_processed < total_files:
@@ -182,20 +179,21 @@ class Reducer(object):
                 if len(os.listdir(directory)) == self.num_files:
                     move(directory, '/efs/reducing/' + directory)
                     move('/efs/data/' + directory + '.tif', '/efs/working/' + directory + '.tif')
+            for directory in os.listdir('/efs/reducing'):
                     os.chdir('/efs/reducing/' + directory)
                     self.reduce_current_directory()
-                    now = timer()
-                    self.logger.info("Done with {}".format(directory))
-                    self.logger.info("Elapsed time: {:.2f} s".format(now - start))
                     self.save_best_result(directory)
                     os.chdir(self.path)
                     rmtree('/efs//reducing/' + directory)
                     os.remove('/efs/working/' + directory + '.tif')
+                    now = timer()
+                    self.logger.info("Done with {}".format(directory))
+                    self.logger.info("Elapsed time: {:.2f} s".format(now - start))
 
         stop = timer()
-        average_time = (stop - start) / num_subgrids
-        self.logger.info("Processed:\t {} files".format(self.files_processed + num_subgrids))
-        self.logger.info("Average processing time: {:.2f} s per grid".format(average_time)) 
+        #average_time = (stop - start) / num_subgrids
+        #self.logger.info("Processed:\t {} files".format(self.files_processed + num_subgrids))
+        #self.logger.info("Average processing time: {:.2f} s per grid".format(average_time)) 
 
         os.chdir(curdir)
                 
