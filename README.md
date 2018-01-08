@@ -28,3 +28,6 @@ All processing currently relies on a filename convention based on UTM coordinate
 where:  
 - `cc` is a data code (`u` for unfiltered, `fg` for filtered ground returns only, etc)
 - `XXX` and `YYYY` are the most siginificant digits of the dataset's lower left corner (XXX000, YYYY000) in UTM coordinate system. In this case, I work in UTM zone 10N.
+
+### TODO
+- Tests, ack
