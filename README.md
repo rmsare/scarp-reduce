@@ -8,7 +8,7 @@ Sandbox for map-reduce style distributed template matching. Very much a work in 
 - AWS EC2, S3, EFS, CloudWatch
 
 ### Core functionality:
-- `Worker.py`: classes for matcher and reducer instances
+- `Worker.py`: Classes for matcher and reducer instances
 - `match.py`: Start and maintain template matching worker
 - `reduce.py`: Initialize reducer that reduces working results directory, then exits
 - `reduce_loop.py`: Start reducer that reduces all intermediate results, until working data directory is empty
@@ -18,7 +18,7 @@ Sandbox for map-reduce style distributed template matching. Very much a work in 
 - `monitor.py`: Monitors and restarts idle instances
 - `manage_data.py`: Fetches tiles from S3 bucket in batches. Fetches entire bucket, or subset with specified starting file.
 
-### Misc.
+### Input data
 Also contains various utilities for copying files in bounding box, tiling a large GeoTIFF dataset, and padding tiles. 
 
 All processing currently relies on a filename convention based on UTM coordinates of tile bounding box, e.g. `fg396_4508.tif`. This is based on EarthScope survey naming conventions:
@@ -31,3 +31,4 @@ where:
 
 ### TODO
 - Tests, ack
+- Add SQS task management from private repo
