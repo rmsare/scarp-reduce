@@ -17,6 +17,8 @@ if __name__ == "__main__":
     age = np.float(sys.argv[2])
     pad_dx = int(sys.argv[3])
     pad_dy = int(sys.argv[4])
+    ang_max = np.float(sys.argv[5])    
+    ang_min = np.float(sys.argv[6])
     ages = [age]
 
     local_data_directory = '/efs/data/'
@@ -31,8 +33,8 @@ if __name__ == "__main__":
     while not finished_processing:
         for tile in files:
             logger.debug("Starting Matcher for {}, {} {:.2f}".format(tile, d, ages[0]))
-            worker = Matcher(local_data_directory + tile, pad_dx, pad_dy) 
-            worker.process(d, ages)
+            worker = Matcher(local_data_directory + tile, pad_dx, pad_dy, ang_max, ang_min) 
+            worker.process(d, ages, ang_max, ang_min)
             logger.debug("Finished processing {}, {} {:.2f}".format(tile, d, ages[0]))
         files = os.listdir(local_data_directory)
         files.sort()

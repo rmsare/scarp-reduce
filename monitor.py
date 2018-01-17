@@ -13,7 +13,7 @@ if __name__ == "__main__":
     logger = logging.getLogger('scarp_reduce')
 
     interval = 15 
-    max_periods = 2
+    max_periods = 4
     
     this_pid = os.getpid()
     os.chdir('/home/ubuntu/')
@@ -39,16 +39,13 @@ if __name__ == "__main__":
             for p in psutil.process_iter():
                 if 'ipython' in p.name() and p.pid != this_pid:
                     commands.append(['sudo', 'kill', '{}'.format(p.pid)])
-                elif p.pid == this_pid:
+                if p.pid == this_pid:
                     kill_me = ['sudo', 'kill', '{}'.format(p.pid)]
 
             commands.append(['sudo', 'sysctl', '-w',  'vm.drop_caches=3'])
             commands.append(['screen', '-wipe'])
-            commands.append(['./runme.sh'])
-            commands.append(kill_me)
+            commands.append(['screen', '-d', '-m', '/home/ubuntu/runme.sh'])
+            #commands.append(kill_me)
 
             for c in commands:
                 subprocess.call(c)
-        
-
-        
