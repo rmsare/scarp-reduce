@@ -4,7 +4,7 @@ Sandbox for map-reduce style distributed template matching. Very much a work in 
 ### Requirements
 - Python
 - The usual suspects (`pip install -r requirements.txt`)
-- [scarplet-python](https://github.com/rmsare/scarplet-python)
+- [scarplet](https://github.com/rmsare/scarplet)
 - AWS EC2, S3, EFS, CloudWatch
 
 ### Core functionality:
